@@ -1,0 +1,29 @@
+# 実行ファイル
+terminal64.exe
+metaeditor64.exe
+
+# ログ・キャッシュ
+*.log
+*.dat
+*.csv
+*.cache
+*.tmp
+*.old
+*.bak
+*.ex5
+
+# ユーザー設定や履歴
+profiles/
+logs/
+tester/
+Logs/
+Files/
+Shared Projects/
+Profiles/
+Images/
+Include/
+Services/
+
+# システムファイル
+Thumbs.db
+Desktop.ini
