@@ -19,28 +19,28 @@ import re
 bucket = 'mt5-cld'
 session = boto3.Session()
 s3 = session.client('s3')
-symbols = ['USDJPY', 'EURUSD', 'GBPUSD', 'AUDUSD']
+symbols = ['EURUSD']
 timeframes = {
     'M5': mt5.TIMEFRAME_M5,
-    'M15': mt5.TIMEFRAME_M15,
-    'H1': mt5.TIMEFRAME_H1,
-    'D1': mt5.TIMEFRAME_D1,
-    'W1': mt5.TIMEFRAME_W1,
-    'MN': mt5.TIMEFRAME_MN1
+    #'M15': mt5.TIMEFRAME_M15,
+    #'H1': mt5.TIMEFRAME_H1,
+    #'D1': mt5.TIMEFRAME_D1,
+    #'W1': mt5.TIMEFRAME_W1,
+    #'MN': mt5.TIMEFRAME_MN1
 }
 # pandas用の頻度マップ
 freq_map = {
     'M5': "5min",
-    'M15': "15min",
-    'H1': "1h",
-    'D1': "1d",
-    'W1': "W",
-    'MN': "ME"
+    #'M15': "15min",
+    #'H1': "1h",
+    #'D1': "1d",
+    #'W1': "W",
+    #'MN': "ME"
 }
 
 # === 日付リスト ===
 today_utc = datetime.now(pytz.utc).date()
-dates_utc = [(today_utc - timedelta(days=i)) for i in range(60)]
+dates_utc = [(today_utc - timedelta(days=i)) for i in range(90)]
 
 # === S3上のCSVファイル一覧を取得 ===
 def list_all_s3_keys():
@@ -101,7 +101,7 @@ def fetch_and_upload(symbol, timeframe_str, date):
 
     # === ローカル保存処理（階層化・日付分割なし） ===
     local_filename = f"{symbol}_{timeframe_str}.csv"
-    base_dir = "C:/Users/Administrator/AppData/Roaming/MetaQuotes/Terminal/D0E8209F77C8CF37AD8BF550E51FF075/MQL5/mt5_dev/data"
+    base_dir = "C:/MT5_portable/MQL5/src/data"
     local_path = os.path.join(base_dir, local_filename)
 
     if not os.path.exists(base_dir):
@@ -159,7 +159,7 @@ for key in existing_keys.copy():
 for symbol in symbols:
     for tf_str, tf in timeframes.items():
         local_filename = f"{symbol}_{tf_str}.csv"
-        base_dir = "C:/Users/Administrator/AppData/Roaming/MetaQuotes/Terminal/D0E8209F77C8CF37AD8BF550E51FF075/MQL5/mt5_dev/data"
+        base_dir = "C:/MT5_portable/MQL5/src/data"
         local_path = os.path.join(base_dir, local_filename)
 
         if os.path.exists(local_path):

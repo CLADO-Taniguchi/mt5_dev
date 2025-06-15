@@ -19,8 +19,8 @@ int OnInit()
     PlotIndexSetInteger(0, PLOT_LINE_WIDTH, 4);
     PlotIndexSetString(0, PLOT_LABEL, "HMA Up/Down");
 
-    ArraySetAsSeries(hmaBuffer, true);
-    ArraySetAsSeries(hmaColors, true);
+    ArraySetAsSeries(hmaBuffer, false);
+    ArraySetAsSeries(hmaColors, false);
 
     return INIT_SUCCEEDED;
 }
@@ -40,23 +40,23 @@ int OnCalculate(
     if (rates_total < Period + 1)
         return 0;
 
-    ArraySetAsSeries(close, true);
+    ArraySetAsSeries(close, false);
 
     int sqrtPeriod = (int)MathSqrt(Period);
     double rawWMA[];
     ArrayResize(rawWMA, rates_total);
-    ArraySetAsSeries(rawWMA, true);
+    ArraySetAsSeries(rawWMA, false);
 
     // 中間WMA
-    for (int i = Period; i < rates_total; i++)
+    for (int i = Period - 1; i < rates_total; i++)
     {
         double wma_half = WMA(i, Period / 2, close);
         double wma_full = WMA(i, Period, close);
         rawWMA[i] = 2 * wma_half - wma_full;
     }
 
-    // HMA
-    for (int i = Period + 1; i < rates_total; i++)
+    // HMA本体
+    for (int i = (int)MathMax(Period - 1, sqrtPeriod - 1); i < rates_total; i++)
     {
         hmaBuffer[i] = WMA(i, sqrtPeriod, rawWMA);
 
