@@ -6,6 +6,7 @@ metaeditor64.exe
 *.log
 *.dat
 *.csv
+**/*.csv
 *.cache
 *.tmp
 *.old
@@ -17,7 +18,7 @@ profiles/
 logs/
 tester/
 Logs/
-Files/
+Files/５
 Shared Projects/
 Profiles/
 Images/
