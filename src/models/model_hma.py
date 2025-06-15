@@ -17,13 +17,24 @@ df['hma'] = hull_moving_average(df['close'], period=21)
 
 # ③ シグナル判定
 df['signal'] = ""
-for i in range(2, len(df)):
-    if df['hma'].iloc[i-2] > df['hma'].iloc[i-1] < df['hma'].iloc[i]:
-        df.at[df.index[i], 'signal'] = "BUY"
-    elif df['hma'].iloc[i-2] < df['hma'].iloc[i-1] > df['hma'].iloc[i]:
-        df.at[df.index[i], 'signal'] = "SELL"
+prev_trend = None
 
-# ④ シグナル判定
+for i in range(2, len(df)):
+    # 現在のトレンド判定
+    if df['hma'].iloc[i-2] < df['hma'].iloc[i-1]:
+        curr_trend = "SELL"
+    elif df['hma'].iloc[i-2] > df['hma'].iloc[i-1]:
+        curr_trend = "BUY"
+    else:
+        curr_trend = prev_trend  # 変化なし
+
+    # トレンドが変化した時だけシグナルを出す
+    if prev_trend is not None and curr_trend != prev_trend:
+        df.at[df.index[i], 'signal'] = curr_trend
+
+    prev_trend = curr_trend
+
+#出力用のtrade_idを付ける
 df['trade_id'] = range(len(df))
 
 # ⑤ CSV出力処理
