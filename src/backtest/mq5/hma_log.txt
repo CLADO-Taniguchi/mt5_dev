@@ -1,0 +1,261 @@
+2025.06.15 10:44:17.151	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.151	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.152	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.152	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.153	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.153	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.154	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.154	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.155	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:17.155	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+（11行目〜1800行目までは同じ結果なので割愛）
+2025.06.15 10:44:18.110	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.110	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.111	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.111	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.112	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.112	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.113	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.113	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.114	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.114	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.115	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.115	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.116	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.116	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.117	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.117	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.118	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.119	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.119	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.120	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.120	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.121	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.121	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.122	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.123	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.124	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.124	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.125	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.125	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.126	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.126	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.127	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.127	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.128	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.128	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.129	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.129	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.130	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.130	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.131	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.132	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.133	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.134	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.135	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.135	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.136	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.136	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.137	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.137	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.138	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.139	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.139	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.140	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.141	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.142	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.143	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.143	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.144	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.144	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.145	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.146	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.146	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.147	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.147	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.148	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.148	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.149	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.149	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.151	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.151	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.152	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.152	backtest_hma_simple (EURUSD,M5)	  FAILED: Could not parse time string
+2025.06.15 10:44:18.152	backtest_hma_simple (EURUSD,M5)	Total data loaded: 18383 rows
+2025.06.15 10:44:18.152	backtest_hma_simple (EURUSD,M5)	Date range: 2025.06.15 00:00 to 1970.01.01 00:00
+2025.06.15 10:44:18.152	backtest_hma_simple (EURUSD,M5)	Calculating HMA with period: 21
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	HMA calculation completed
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Running backtest simulation...
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #10 - LOSE (-8.1 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #20 - LOSE (-1.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #30 - LOSE (-2.4 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #40 - WIN (2.7 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #50 - WIN (3.8 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #60 - WIN (3.9 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #70 - LOSE (-1.6 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #80 - LOSE (-0.7 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #90 - WIN (2.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #100 - LOSE (-5.9 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #110 - LOSE (-0.7 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #120 - WIN (4.9 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #130 - WIN (1.7 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #140 - LOSE (-5.3 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #150 - WIN (2.3 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #160 - LOSE (-1.7 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #170 - WIN (13.6 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #180 - WIN (7.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #190 - LOSE (-5.1 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #200 - LOSE (-0.5 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #210 - WIN (16.6 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #220 - WIN (0.2 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #230 - LOSE (-3.9 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #240 - LOSE (-2.1 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #250 - LOSE (-2.3 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #260 - LOSE (-1.3 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #270 - WIN (0.9 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #280 - WIN (8.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #290 - WIN (3.1 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #300 - LOSE (-22.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #310 - LOSE (-6.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #320 - WIN (48.1 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #330 - LOSE (-18.5 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #340 - WIN (66.5 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #350 - LOSE (-15.5 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #360 - WIN (1.5 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #370 - WIN (5.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #380 - LOSE (-2.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #390 - WIN (23.9 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #400 - LOSE (-3.8 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #410 - LOSE (-38.6 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #420 - LOSE (-44.5 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #430 - WIN (30.8 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #440 - LOSE (-9.8 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #450 - LOSE (-2.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #460 - LOSE (-8.4 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #470 - WIN (9.0 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #480 - LOSE (-12.4 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #490 - LOSE (-14.9 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #500 - WIN (4.7 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #510 - LOSE (-3.8 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #520 - LOSE (-5.6 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #530 - WIN (1.6 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #540 - LOSE (-6.1 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #550 - WIN (2.1 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #560 - WIN (0.5 pips)
+2025.06.15 10:44:18.154	backtest_hma_simple (EURUSD,M5)	Completed trade #570 - LOSE (-5.1 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #580 - LOSE (-15.2 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #590 - WIN (0.2 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #600 - LOSE (-0.7 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #610 - LOSE (-3.6 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #620 - LOSE (-2.9 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #630 - WIN (5.2 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #640 - WIN (6.7 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #650 - WIN (4.5 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #660 - LOSE (-2.1 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #670 - LOSE (-5.8 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #680 - LOSE (-21.9 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #690 - WIN (4.5 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #700 - WIN (1.7 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #710 - LOSE (-24.8 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #720 - LOSE (-21.7 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #730 - WIN (2.2 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #740 - WIN (4.6 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #750 - LOSE (-5.0 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #760 - WIN (2.0 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #770 - WIN (1.7 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #780 - WIN (3.9 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #790 - LOSE (-0.2 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #800 - LOSE (-22.6 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #810 - WIN (2.3 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #820 - LOSE (-5.4 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Entry at index 10000 - SELL
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #830 - WIN (0.2 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #840 - LOSE (-3.0 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #850 - LOSE (-2.1 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #860 - LOSE (-3.5 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #870 - WIN (3.7 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #880 - LOSE (-9.4 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #890 - LOSE (-16.9 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #900 - LOSE (-9.2 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #910 - WIN (9.1 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #920 - LOSE (-0.3 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #930 - WIN (2.6 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #940 - LOSE (-4.9 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #950 - LOSE (-7.1 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #960 - LOSE (-1.8 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #970 - WIN (5.7 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #980 - WIN (2.9 pips)
+2025.06.15 10:44:18.155	backtest_hma_simple (EURUSD,M5)	Completed trade #990 - LOSE (-12.6 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1000 - WIN (9.9 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1010 - LOSE (-0.8 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1020 - WIN (17.0 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1030 - WIN (0.2 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1040 - LOSE (-13.0 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1050 - WIN (17.0 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1060 - LOSE (-13.7 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1070 - LOSE (-8.9 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1080 - LOSE (-8.1 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1090 - LOSE (-5.3 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1100 - LOSE (-1.6 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1110 - LOSE (-6.1 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1120 - LOSE (-4.5 pips)
+2025.06.15 10:44:18.156	backtest_hma_simple (EURUSD,M5)	Completed trade #1130 - WIN (4.4 pips)
+2025.06.15 10:44:18.157	backtest_hma_simple (EURUSD,M5)	Completed trade #1140 - LOSE (-1.1 pips)
+2025.06.15 10:44:18.157	backtest_hma_simple (EURUSD,M5)	Completed trade #1150 - LOSE (-13.4 pips)
+2025.06.15 10:44:18.158	backtest_hma_simple (EURUSD,M5)	Completed trade #1160 - LOSE (-2.9 pips)
+2025.06.15 10:44:18.159	backtest_hma_simple (EURUSD,M5)	Completed trade #1170 - LOSE (-2.9 pips)
+2025.06.15 10:44:18.159	backtest_hma_simple (EURUSD,M5)	Completed trade #1180 - LOSE (-4.0 pips)
+2025.06.15 10:44:18.160	backtest_hma_simple (EURUSD,M5)	Completed trade #1190 - WIN (4.4 pips)
+2025.06.15 10:44:18.160	backtest_hma_simple (EURUSD,M5)	Completed trade #1200 - LOSE (-2.7 pips)
+2025.06.15 10:44:18.161	backtest_hma_simple (EURUSD,M5)	Completed trade #1210 - WIN (7.7 pips)
+2025.06.15 10:44:18.162	backtest_hma_simple (EURUSD,M5)	Completed trade #1220 - LOSE (-2.4 pips)
+2025.06.15 10:44:18.162	backtest_hma_simple (EURUSD,M5)	Completed trade #1230 - WIN (9.2 pips)
+2025.06.15 10:44:18.163	backtest_hma_simple (EURUSD,M5)	Completed trade #1240 - LOSE (-3.5 pips)
+2025.06.15 10:44:18.164	backtest_hma_simple (EURUSD,M5)	Completed trade #1250 - WIN (3.3 pips)
+2025.06.15 10:44:18.164	backtest_hma_simple (EURUSD,M5)	Completed trade #1260 - LOSE (-1.1 pips)
+2025.06.15 10:44:18.165	backtest_hma_simple (EURUSD,M5)	Completed trade #1270 - WIN (0.1 pips)
+2025.06.15 10:44:18.165	backtest_hma_simple (EURUSD,M5)	Completed trade #1280 - LOSE (-18.7 pips)
+2025.06.15 10:44:18.166	backtest_hma_simple (EURUSD,M5)	Completed trade #1290 - WIN (1.4 pips)
+2025.06.15 10:44:18.167	backtest_hma_simple (EURUSD,M5)	Completed trade #1300 - LOSE (-5.6 pips)
+2025.06.15 10:44:18.167	backtest_hma_simple (EURUSD,M5)	Completed trade #1310 - LOSE (-8.3 pips)
+2025.06.15 10:44:18.168	backtest_hma_simple (EURUSD,M5)	Completed trade #1320 - WIN (6.9 pips)
+2025.06.15 10:44:18.168	backtest_hma_simple (EURUSD,M5)	Completed trade #1330 - LOSE (-1.7 pips)
+2025.06.15 10:44:18.169	backtest_hma_simple (EURUSD,M5)	Completed trade #1340 - WIN (5.7 pips)
+2025.06.15 10:44:18.170	backtest_hma_simple (EURUSD,M5)	Entry at index 16000 - SELL
+2025.06.15 10:44:18.170	backtest_hma_simple (EURUSD,M5)	Completed trade #1350 - LOSE (-4.8 pips)
+2025.06.15 10:44:18.170	backtest_hma_simple (EURUSD,M5)	Completed trade #1360 - WIN (8.7 pips)
+2025.06.15 10:44:18.171	backtest_hma_simple (EURUSD,M5)	Completed trade #1370 - WIN (6.9 pips)
+2025.06.15 10:44:18.172	backtest_hma_simple (EURUSD,M5)	Completed trade #1380 - WIN (0.4 pips)
+2025.06.15 10:44:18.172	backtest_hma_simple (EURUSD,M5)	Completed trade #1390 - WIN (0.9 pips)
+2025.06.15 10:44:18.173	backtest_hma_simple (EURUSD,M5)	Completed trade #1400 - WIN (2.0 pips)
+2025.06.15 10:44:18.174	backtest_hma_simple (EURUSD,M5)	Completed trade #1410 - WIN (2.9 pips)
+2025.06.15 10:44:18.174	backtest_hma_simple (EURUSD,M5)	Completed trade #1420 - LOSE (-7.4 pips)
+2025.06.15 10:44:18.175	backtest_hma_simple (EURUSD,M5)	Completed trade #1430 - WIN (2.0 pips)
+2025.06.15 10:44:18.176	backtest_hma_simple (EURUSD,M5)	Completed trade #1440 - LOSE (-1.3 pips)
+2025.06.15 10:44:18.176	backtest_hma_simple (EURUSD,M5)	Completed trade #1450 - WIN (3.9 pips)
+2025.06.15 10:44:18.177	backtest_hma_simple (EURUSD,M5)	Completed trade #1460 - WIN (6.0 pips)
+2025.06.15 10:44:18.178	backtest_hma_simple (EURUSD,M5)	Completed trade #1470 - LOSE (-13.4 pips)
+2025.06.15 10:44:18.178	backtest_hma_simple (EURUSD,M5)	Completed trade #1480 - WIN (1.3 pips)
+2025.06.15 10:44:18.179	backtest_hma_simple (EURUSD,M5)	Completed trade #1490 - WIN (1.3 pips)
+2025.06.15 10:44:18.180	backtest_hma_simple (EURUSD,M5)	Completed trade #1500 - LOSE (-11.7 pips)
+2025.06.15 10:44:18.180	backtest_hma_simple (EURUSD,M5)	Completed trade #1510 - LOSE (-1.3 pips)
+2025.06.15 10:44:18.181	backtest_hma_simple (EURUSD,M5)	Completed trade #1520 - LOSE (-27.2 pips)
+2025.06.15 10:44:18.182	backtest_hma_simple (EURUSD,M5)	Completed trade #1530 - WIN (2.1 pips)
+2025.06.15 10:44:18.183	backtest_hma_simple (EURUSD,M5)	Completed trade #1540 - WIN (15.4 pips)
+2025.06.15 10:44:18.183	backtest_hma_simple (EURUSD,M5)	Completed trade #1550 - LOSE (-2.0 pips)
+2025.06.15 10:44:18.184	backtest_hma_simple (EURUSD,M5)	Backtest completed. Total trades: 1557
+2025.06.15 10:44:18.184	backtest_hma_simple (EURUSD,M5)	Saving results to: backtest_hma_20250613235959.csv
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Results saved successfully. Total trades written: 1557
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	=== BACKTEST STATISTICS ===
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Total Trades: 1557
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Win Rate: 48.17%
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Total Profit: -400.9 pips
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Average Profit: -0.3 pips
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Max Profit: 66.5 pips
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Max Loss: -109.8 pips
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	==========================
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	NOTE: unix_time column contains Unix timestamps.
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Convert to datetime in Excel: =A2/86400+DATE(1970,1,1)
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	Convert in Python: pd.to_datetime(df['unix_time'], unit='s')
+2025.06.15 10:44:18.188	backtest_hma_simple (EURUSD,M5)	=== HMA Backtest Script Complete ===
