@@ -180,40 +180,39 @@ int OnCalculate(
                     }
                     else
                     {
-                        // ポジション決済
+                        // ポジション決済のみ（新規エントリーはしない）
                         exitCounter++;
                         labelName = "X_" + IntegerToString(exitCounter);
                         labelText = "X_" + IntegerToString(exitCounter);
-                        hasOpenPosition = false;
+                        hasOpenPosition = false;  // ポジションクローズ
                         
                         if (currentTrend == 0)  // BUYシグナルで決済（前のSELLポジション決済）
                         {
                             buySignalBuffer[i] = low[i] - (high[i] - low[i]) * 0.3;
                             sellSignalBuffer[i] = EMPTY_VALUE;
-                            labelPrice = low[i] - (high[i] - low[i]) * 0.5;
+                            labelPrice = high[i] + (high[i] - low[i]) * 0.8;  // EXITは上側に配置
                             labelColor = ExitLabelColor;
                             
                             if (ShowAlerts && i == rates_total - 1)
                             {
-                                Alert("HMA Exit X_", exitCounter, " at ", _Symbol);
+                                Alert("HMA EXIT X_", exitCounter, " (SELL position closed) at ", _Symbol);
                             }
                         }
                         else  // SELLシグナルで決済（前のBUYポジション決済）
                         {
                             sellSignalBuffer[i] = high[i] + (high[i] - low[i]) * 0.3;
                             buySignalBuffer[i] = EMPTY_VALUE;
-                            labelPrice = high[i] + (high[i] - low[i]) * 0.5;
+                            labelPrice = low[i] - (high[i] - low[i]) * 0.8;  // EXITは下側に配置
                             labelColor = ExitLabelColor;
                             
                             if (ShowAlerts && i == rates_total - 1)
                             {
-                                Alert("HMA Exit X_", exitCounter, " at ", _Symbol);
+                                Alert("HMA EXIT X_", exitCounter, " (BUY position closed) at ", _Symbol);
                             }
                         }
                         
-                        // すぐに新規エントリー開始
-                        entryCounter++;
-                        hasOpenPosition = true;
+                        // 新規エントリーは次の反転まで待機
+                        // hasOpenPosition = false のまま
                     }
                     
                     // ラベル作成
