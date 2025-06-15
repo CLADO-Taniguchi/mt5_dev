@@ -15,7 +15,7 @@
 //--- 入力パラメータ
 input double   Lots = 0.1;           // ロットサイズ
 input int      HMA_Period = 14;      // HMA期間
-input int      Magic = 12345;        // マジックナンバー
+input int      Magic = 1105;        // マジックナンバー
 input double   StopLoss = 100;       // ストップロス(ポイント)
 input double   TakeProfit = 200;     // テイクプロフィット(ポイント)
 
