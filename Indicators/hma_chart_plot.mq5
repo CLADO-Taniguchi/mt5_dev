@@ -11,12 +11,6 @@ input int LabelFontSize = 8;         // ラベルフォントサイズ
 input color EntryLabelColor = clrWhite;   // エントリーラベル色
 input color ExitLabelColor = clrWhite;     // エグジットラベル色
 
-// HMA角度フィルター設定
-input bool UseAngleFilter = true;    // 角度フィルター使用
-input double MinAngle = 0.5;         // 最小角度（度）
-input int AnglePeriod = 3;           // 角度計算期間
-input bool ShowAngleInAlert = true;  // アラートに角度表示
-
 double hmaBuffer[];      // HMAライン
 double hmaColors[];      // 色インデックス
 double buySignalBuffer[]; // BUYシグナル
@@ -146,115 +140,93 @@ int OnCalculate(
                 // トレンド反転チェック
                 if (currentTrend != prevTrend)
                 {
-                    // HMA角度フィルターチェック
-                    bool trendingNow = IsTrending(i);
+                    string labelName = "";
+                    string labelText = "";
+                    color labelColor;
+                    double labelPrice;
                     
-                    if (trendingNow)  // 角度が十分にある場合のみシグナル生成
+                    if (!hasOpenPosition)
                     {
-                        string labelName = "";
-                        string labelText = "";
-                        color labelColor;
-                        double labelPrice;
+                        // 新規エントリー
+                        entryCounter++;
+                        labelName = "E_" + IntegerToString(entryCounter);
+                        labelText = "E_" + IntegerToString(entryCounter);
+                        hasOpenPosition = true;
                         
-                        if (!hasOpenPosition)
+                        if (currentTrend == 0)  // BUYエントリー
                         {
-                            // 新規エントリー
-                            entryCounter++;
-                            labelName = "E_" + IntegerToString(entryCounter);
-                            labelText = "E_" + IntegerToString(entryCounter);
-                            hasOpenPosition = true;
+                            buySignalBuffer[i] = low[i] - (high[i] - low[i]) * 0.3;
+                            sellSignalBuffer[i] = EMPTY_VALUE;
+                            labelPrice = low[i] - (high[i] - low[i]) * 0.5;
+                            labelColor = EntryLabelColor;
                             
-                            if (currentTrend == 0)  // BUYエントリー
+                            if (ShowAlerts && i == rates_total - 1)
                             {
-                                buySignalBuffer[i] = low[i] - (high[i] - low[i]) * 0.3;
-                                sellSignalBuffer[i] = EMPTY_VALUE;
-                                labelPrice = low[i] - (high[i] - low[i]) * 0.5;
-                                labelColor = EntryLabelColor;
-                                
-                                if (ShowAngleInAlert && ShowAlerts && i == rates_total - 1)
-                                {
-                                    double angle = CalculateHMAAngle(i);
-                                    Alert("HMA BUY Entry E_", entryCounter, " - Angle: ", DoubleToString(angle, 2), "° (Min:", DoubleToString(MinAngle, 1), "°)");
-                                }
-                            }
-                            else  // SELLエントリー
-                            {
-                                sellSignalBuffer[i] = high[i] + (high[i] - low[i]) * 0.3;
-                                buySignalBuffer[i] = EMPTY_VALUE;
-                                labelPrice = high[i] + (high[i] - low[i]) * 0.5;
-                                labelColor = EntryLabelColor;
-                                
-                                if (ShowAngleInAlert && ShowAlerts && i == rates_total - 1)
-                                {
-                                    double angle = CalculateHMAAngle(i);
-                                    Alert("HMA SELL Entry E_", entryCounter, " - Angle: ", DoubleToString(angle, 2), "° (Min:", DoubleToString(MinAngle, 1), "°)");
-                                }
+                                Alert("HMA BUY Entry E_", entryCounter, " at ", _Symbol);
                             }
                         }
-                        else
+                        else  // SELLエントリー
                         {
-                            // ポジション決済
-                            exitCounter++;
-                            labelName = "X_" + IntegerToString(exitCounter);
-                            labelText = "X_" + IntegerToString(exitCounter);
-                            hasOpenPosition = false;
+                            sellSignalBuffer[i] = high[i] + (high[i] - low[i]) * 0.3;
+                            buySignalBuffer[i] = EMPTY_VALUE;
+                            labelPrice = high[i] + (high[i] - low[i]) * 0.5;
+                            labelColor = EntryLabelColor;
                             
-                            if (currentTrend == 0)  // BUYシグナルで決済（前のSELLポジション決済）
+                            if (ShowAlerts && i == rates_total - 1)
                             {
-                                buySignalBuffer[i] = low[i] - (high[i] - low[i]) * 0.3;
-                                sellSignalBuffer[i] = EMPTY_VALUE;
-                                labelPrice = low[i] - (high[i] - low[i]) * 0.5;
-                                labelColor = ExitLabelColor;
-                                
-                                if (ShowAngleInAlert && ShowAlerts && i == rates_total - 1)
-                                {
-                                    double angle = CalculateHMAAngle(i);
-                                    Alert("HMA Exit X_", exitCounter, " - Angle: ", DoubleToString(angle, 2), "° (Min:", DoubleToString(MinAngle, 1), "°)");
-                                }
+                                Alert("HMA SELL Entry E_", entryCounter, " at ", _Symbol);
                             }
-                            else  // SELLシグナルで決済（前のBUYポジション決済）
-                            {
-                                sellSignalBuffer[i] = high[i] + (high[i] - low[i]) * 0.3;
-                                buySignalBuffer[i] = EMPTY_VALUE;
-                                labelPrice = high[i] + (high[i] - low[i]) * 0.5;
-                                labelColor = ExitLabelColor;
-                                
-                                if (ShowAngleInAlert && ShowAlerts && i == rates_total - 1)
-                                {
-                                    double angle = CalculateHMAAngle(i);
-                                    Alert("HMA Exit X_", exitCounter, " - Angle: ", DoubleToString(angle, 2), "° (Min:", DoubleToString(MinAngle, 1), "°)");
-                                }
-                            }
-                            
-                            // すぐに新規エントリー開始
-                            entryCounter++;
-                            hasOpenPosition = true;
-                        }
-                        
-                        // ラベル作成
-                        if (ShowLabels)
-                        {
-                            ObjectCreate(0, labelName, OBJ_TEXT, 0, time[i], labelPrice);
-                            ObjectSetString(0, labelName, OBJPROP_TEXT, labelText);
-                            ObjectSetInteger(0, labelName, OBJPROP_COLOR, labelColor);
-                            ObjectSetInteger(0, labelName, OBJPROP_FONTSIZE, LabelFontSize);
-                            ObjectSetInteger(0, labelName, OBJPROP_ANCHOR, ANCHOR_CENTER);
-                            ObjectSetInteger(0, labelName, OBJPROP_BACK, false);
-                            ObjectSetInteger(0, labelName, OBJPROP_SELECTABLE, false);
-                            ObjectSetInteger(0, labelName, OBJPROP_HIDDEN, true);
                         }
                     }
                     else
                     {
-                        // 角度が不十分（横向き）の場合はシグナルをスキップ
-                        buySignalBuffer[i] = EMPTY_VALUE;
-                        sellSignalBuffer[i] = EMPTY_VALUE;
+                        // ポジション決済
+                        exitCounter++;
+                        labelName = "X_" + IntegerToString(exitCounter);
+                        labelText = "X_" + IntegerToString(exitCounter);
+                        hasOpenPosition = false;
                         
-                        if (ShowAngleInAlert && ShowAlerts && i == rates_total - 1)
+                        if (currentTrend == 0)  // BUYシグナルで決済（前のSELLポジション決済）
                         {
-                            double angle = CalculateHMAAngle(i);
-                            Alert("HMA Signal SKIPPED - Angle: ", DoubleToString(angle, 2), "° < Min: ", DoubleToString(MinAngle, 1), "°");
+                            buySignalBuffer[i] = low[i] - (high[i] - low[i]) * 0.3;
+                            sellSignalBuffer[i] = EMPTY_VALUE;
+                            labelPrice = low[i] - (high[i] - low[i]) * 0.5;
+                            labelColor = ExitLabelColor;
+                            
+                            if (ShowAlerts && i == rates_total - 1)
+                            {
+                                Alert("HMA Exit X_", exitCounter, " at ", _Symbol);
+                            }
                         }
+                        else  // SELLシグナルで決済（前のBUYポジション決済）
+                        {
+                            sellSignalBuffer[i] = high[i] + (high[i] - low[i]) * 0.3;
+                            buySignalBuffer[i] = EMPTY_VALUE;
+                            labelPrice = high[i] + (high[i] - low[i]) * 0.5;
+                            labelColor = ExitLabelColor;
+                            
+                            if (ShowAlerts && i == rates_total - 1)
+                            {
+                                Alert("HMA Exit X_", exitCounter, " at ", _Symbol);
+                            }
+                        }
+                        
+                        // すぐに新規エントリー開始
+                        entryCounter++;
+                        hasOpenPosition = true;
+                    }
+                    
+                    // ラベル作成
+                    if (ShowLabels)
+                    {
+                        ObjectCreate(0, labelName, OBJ_TEXT, 0, time[i], labelPrice);
+                        ObjectSetString(0, labelName, OBJPROP_TEXT, labelText);
+                        ObjectSetInteger(0, labelName, OBJPROP_COLOR, labelColor);
+                        ObjectSetInteger(0, labelName, OBJPROP_FONTSIZE, LabelFontSize);
+                        ObjectSetInteger(0, labelName, OBJPROP_ANCHOR, ANCHOR_CENTER);
+                        ObjectSetInteger(0, labelName, OBJPROP_BACK, false);
+                        ObjectSetInteger(0, labelName, OBJPROP_SELECTABLE, false);
+                        ObjectSetInteger(0, labelName, OBJPROP_HIDDEN, true);
                     }
                 }
                 else
@@ -273,44 +245,6 @@ int OnCalculate(
     }
 
     return rates_total;
-}
-
-// HMA角度計算関数
-double CalculateHMAAngle(int pos)
-{
-    if (pos < AnglePeriod || hmaBuffer[pos] == 0.0 || hmaBuffer[pos - AnglePeriod] == 0.0)
-        return 0.0;
-    
-    double hmaChange = hmaBuffer[pos] - hmaBuffer[pos - AnglePeriod];
-    double angle = MathArctan(hmaChange / AnglePeriod) * 180.0 / 3.14159265359;
-    
-    // デバッグ用：角度計算の詳細をコメントアウトして確認可能
-    /*
-    Print("DEBUG - Pos:", pos, " HMA[", pos, "]:", hmaBuffer[pos], 
-          " HMA[", pos-AnglePeriod, "]:", hmaBuffer[pos-AnglePeriod],
-          " Change:", hmaChange, " Angle:", angle);
-    */
-    
-    return angle;
-}
-
-// トレンド判定関数
-bool IsTrending(int pos)
-{
-    if (!UseAngleFilter)
-        return true;  // フィルター無効時は常にトレンド扱い
-    
-    double angle = CalculateHMAAngle(pos);
-    bool trending = MathAbs(angle) > MinAngle;
-    
-    // デバッグ用：判定結果をコメントアウトして確認可能
-    /*
-    Print("DEBUG - Trending Check: Angle=", DoubleToString(angle, 3), 
-          " MinAngle=", DoubleToString(MinAngle, 1), 
-          " Result=", trending ? "TRUE" : "FALSE");
-    */
-    
-    return trending;
 }
 
 double WMA(int pos, int len, const double &data[])
