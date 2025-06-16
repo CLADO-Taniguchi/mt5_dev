@@ -399,4 +399,4 @@ def predict_price():
 
 if __name__ == '__main__':
     logging.info("Flask Trading API Server starting...")
-    app.run(host='0.0.0.0', port=5001, debug=False, threaded=True)  # ポート5001に変更
+    app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)  # ポート5000に戻す
