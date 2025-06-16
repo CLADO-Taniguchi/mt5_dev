@@ -12,6 +12,7 @@ metaeditor64.exe
 *.old
 *.bak
 *.ex5
+*.chr
 
 # ユーザー設定や履歴
 profiles/
