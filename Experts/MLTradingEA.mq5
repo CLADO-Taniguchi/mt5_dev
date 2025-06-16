@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2025, MetaQuotes Ltd."
 #property link      "https://www.mql5.com"
-#property version   "1.00"
+#property version   "2.00"
 
 // アカウント管理ライブラリをインクルード
 #include <AccountManager.mqh>
@@ -33,14 +33,19 @@ int total_api_calls = 0;
 int successful_api_calls = 0;
 bool api_available = true;
 datetime last_successful_connection = 0;
+string current_symbol = "";
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
 {
+    // シンボル名を取得
+    current_symbol = _Symbol;
+    
     // 初期化ログ
     Print("=== ML Trading EA 初期化 ===");
+    Print("対象シンボル: ", current_symbol);
     Print("API URL: ", FIXED_API_URL, " (固定)");
     Print("データ送信間隔: ", SendDataInterval, "秒");
     Print("最小信頼度: ", MinConfidence);
@@ -65,7 +70,7 @@ int OnInit()
 void OnDeinit(const int reason)
 {
     EventKillTimer();
-    Print("ML Trading EA 終了");
+    Print("ML Trading EA 終了 - ", current_symbol);
 }
 
 //+------------------------------------------------------------------+
@@ -142,7 +147,7 @@ bool TestAPIConnection()
 }
 
 //+------------------------------------------------------------------+
-//| ティックデータをAPIに送信（改良版）                                        |
+//| ティックデータをAPIに送信（シンボル対応版）                                  |
 //+------------------------------------------------------------------+
 void SendTickData()
 {
@@ -177,9 +182,10 @@ void SendTickData()
         return;
     }
     
-    // JSON データ作成
+    // JSON データ作成（シンボル情報を含む）
     string json_data = StringFormat(
         "{"
+        "\"symbol\":\"%s\","
         "\"datetime\":\"%s\","
         "\"open\":%.5f,"
         "\"high\":%.5f,"
@@ -187,6 +193,7 @@ void SendTickData()
         "\"close\":%.5f,"
         "\"volume\":%d"
         "}",
+        current_symbol,  // シンボル情報を追加
         TimeToString(tick.time, TIME_DATE|TIME_SECONDS),
         rates[0].open,
         rates[0].high,
@@ -221,11 +228,12 @@ void SendTickData()
 }
 
 //+------------------------------------------------------------------+
-//| 取引シグナルを処理                                                    |
+//| 取引シグナルを処理（シンボル対応版）                                        |
 //+------------------------------------------------------------------+
 void ProcessTradingSignal()
 {
-    string url = FIXED_API_URL + "/signal";
+    // シンボル指定のエンドポイントを使用
+    string url = FIXED_API_URL + "/signal/" + current_symbol;
     string response = GetRequest(url);
     
     if(response == "")
@@ -235,19 +243,25 @@ void ProcessTradingSignal()
     string signal = ExtractJsonString(response, "signal");
     double confidence = ExtractJsonDouble(response, "confidence");
     double predicted_price = ExtractJsonDouble(response, "predicted_price");
+    string message = ExtractJsonString(response, "message");
     
     // データ更新
     last_signal = signal;
     last_confidence = confidence;
     last_predicted_price = predicted_price;
     
-    Print(StringFormat("シグナル: %s, 信頼度: %.3f, 予測価格: %.5f", 
-          signal, confidence, predicted_price));
+    Print(StringFormat("[%s] シグナル: %s, 信頼度: %.3f, 予測価格: %.5f, メッセージ: %s", 
+          current_symbol, signal, confidence, predicted_price, message));
     
     // 取引実行判定
-    if(confidence >= MinConfidence)
+    if(confidence >= MinConfidence && (signal == "BUY" || signal == "SELL"))
     {
         ExecuteTradeSignal(signal, confidence);
+    }
+    else if(signal == "HOLD")
+    {
+        Print(StringFormat("[%s] ホールド中 - 信頼度: %.3f (最小: %.2f)", 
+              current_symbol, confidence, MinConfidence));
     }
 }
 
@@ -259,14 +273,15 @@ void ExecuteTradeSignal(string signal, double confidence)
     // アカウント管理チェック
     if(UseAccountManager && !g_AccountManager.IsTradingAllowed())
     {
-        Print("アカウント管理により取引停止中");
+        Print(StringFormat("[%s] アカウント管理により取引停止中", current_symbol));
         return;
     }
     
     // 現在のポジション数チェック
-    if(PositionsTotal() >= MaxPositions)
+    if(CountMyPositions() >= MaxPositions)
     {
-        Print("最大ポジション数に達しています");
+        Print(StringFormat("[%s] 最大ポジション数に達しています (%d/%d)", 
+              current_symbol, CountMyPositions(), MaxPositions));
         return;
     }
     
@@ -279,6 +294,27 @@ void ExecuteTradeSignal(string signal, double confidence)
     {
         OpenPosition(ORDER_TYPE_SELL, confidence);
     }
+}
+
+//+------------------------------------------------------------------+
+//| 自分のポジション数をカウント                                            |
+//+------------------------------------------------------------------+
+int CountMyPositions()
+{
+    int count = 0;
+    for(int i = 0; i < PositionsTotal(); i++)
+    {
+        ulong ticket = PositionGetTicket(i);
+        if(PositionSelectByTicket(ticket))
+        {
+            if(PositionGetString(POSITION_SYMBOL) == current_symbol && 
+               PositionGetInteger(POSITION_MAGIC) == Magic)
+            {
+                count++;
+            }
+        }
+    }
+    return count;
 }
 
 //+------------------------------------------------------------------+
@@ -302,8 +338,11 @@ void OpenPosition(ENUM_ORDER_TYPE order_type, double confidence)
     
     // 最小ロットサイズチェック
     double min_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+    double max_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
     if(adjusted_lots < min_lot)
         adjusted_lots = min_lot;
+    if(adjusted_lots > max_lot)
+        adjusted_lots = max_lot;
     
     // ストップロスとテイクプロフィット
     double sl = 0, tp = 0;
@@ -332,18 +371,29 @@ void OpenPosition(ENUM_ORDER_TYPE order_type, double confidence)
     request.sl = sl;
     request.tp = tp;
     request.magic = Magic;
-    request.comment = StringFormat("ML_%.2f", confidence);
+    request.comment = StringFormat("ML_%s_%.2f", current_symbol, confidence);
     
     // 注文実行
     if(OrderSend(request, result))
     {
-        Print(StringFormat("ポジションオープン: %s, ロット: %.2f, 価格: %.5f, 信頼度: %.2f",
+        Print(StringFormat("[%s] ポジションオープン: %s, ロット: %.2f, 価格: %.5f, 信頼度: %.2f",
+              current_symbol,
               (order_type == ORDER_TYPE_BUY ? "BUY" : "SELL"),
               adjusted_lots, price, confidence));
+        
+        // 予測価格情報も出力
+        if(last_predicted_price > 0)
+        {
+            double price_diff = last_predicted_price - price;
+            Print(StringFormat("[%s] 予測価格: %.5f, 差分: %.5f pips",
+                  current_symbol, last_predicted_price, 
+                  MathAbs(price_diff) / point / 10));
+        }
     }
     else
     {
-        Print("注文エラー: ", result.comment);
+        Print(StringFormat("[%s] 注文エラー: %s (コード: %d)",
+              current_symbol, result.comment, result.retcode));
     }
 }
 
@@ -357,12 +407,45 @@ void ManagePositions()
         ulong ticket = PositionGetTicket(i);
         if(PositionSelectByTicket(ticket))
         {
-            if(PositionGetInteger(POSITION_MAGIC) != Magic)
+            if(PositionGetString(POSITION_SYMBOL) != current_symbol ||
+               PositionGetInteger(POSITION_MAGIC) != Magic)
                 continue;
                 
             // 必要に応じて追加のポジション管理ロジック
             // 例: トレーリングストップ、時間ベースの決済など
+            
+            // 現在は基本的なポジション情報のみログ出力
+            double profit = PositionGetDouble(POSITION_PROFIT);
+            if(profit != 0)
+            {
+                // 大きな利益または損失の場合にログ出力
+                if(MathAbs(profit) > 10.0)
+                {
+                    Print(StringFormat("[%s] ポジション #%d 損益: %.2f",
+                          current_symbol, ticket, profit));
+                }
+            }
         }
+    }
+}
+
+//+------------------------------------------------------------------+
+//| シンボル別状態チェック機能                                            |
+//+------------------------------------------------------------------+
+void CheckSymbolStatus()
+{
+    string url = FIXED_API_URL + "/status/" + current_symbol;
+    string response = GetRequest(url);
+    
+    if(response != "")
+    {
+        int buffer_size = (int)ExtractJsonDouble(response, "current_buffer_size");
+        int total_records = (int)ExtractJsonDouble(response, "total_records");
+        bool model_loaded = ExtractJsonString(response, "model_loaded") == "true";
+        
+        Print(StringFormat("[%s] API状態 - バッファ: %d件, 総レコード: %d件, モデル: %s",
+              current_symbol, buffer_size, total_records, 
+              model_loaded ? "読み込み済み" : "未読み込み"));
     }
 }
 
@@ -392,8 +475,8 @@ bool SendPostRequest(string url, string json_data)
         if(!api_available)
         {
             api_available = true;
-            Print("API接続復旧 - 成功率: ", 
-                  DoubleToString((double)successful_api_calls/total_api_calls*100, 1), "%");
+            Print(StringFormat("[%s] API接続復旧 - 成功率: %.1f%%", 
+                  current_symbol, (double)successful_api_calls/total_api_calls*100));
         }
         return true;
     }
@@ -413,14 +496,25 @@ bool SendPostRequest(string url, string json_data)
             default: error_msg = "HTTPエラー " + IntegerToString(res); break;
         }
         
-        Print("API接続エラー: ", error_msg, 
-              " (連続失敗:", consecutive_failures, "回)");
+        Print(StringFormat("[%s] API接続エラー: %s (連続失敗:%d回)",
+              current_symbol, error_msg, consecutive_failures));
+        
+        // レスポンス内容がある場合は表示
+        if(ArraySize(result) > 0)
+        {
+            string response = CharArrayToString(result);
+            if(StringLen(response) > 0)
+            {
+                Print(StringFormat("[%s] エラー詳細: %s", current_symbol, response));
+            }
+        }
         
         // 3回連続失敗でAPI無効扱い
         if(consecutive_failures >= 3)
         {
             api_available = false;
-            Print("API接続無効化 - 連続失敗数:", consecutive_failures);
+            Print(StringFormat("[%s] API接続無効化 - 連続失敗数:%d", 
+                  current_symbol, consecutive_failures));
         }
         
         return false;
@@ -444,6 +538,11 @@ string GetRequest(string url)
     {
         return CharArrayToString(result);
     }
+    else if(res != 0)
+    {
+        // エラーログ（GETリクエストでは詳細ログは控えめに）
+        Print(StringFormat("[%s] GET リクエストエラー: HTTP %d", current_symbol, res));
+    }
     
     return "";
 }
@@ -457,7 +556,26 @@ string ExtractJsonString(string json, string key)
     int start_pos = StringFind(json, search_pattern);
     
     if(start_pos == -1)
+    {
+        // null値のチェック
+        string null_pattern = "\"" + key + "\":null";
+        if(StringFind(json, null_pattern) != -1)
+            return "";
+            
+        // boolean値のチェック
+        string bool_pattern = "\"" + key + "\":";
+        int bool_pos = StringFind(json, bool_pattern);
+        if(bool_pos != -1)
+        {
+            int bool_start = bool_pos + StringLen(bool_pattern);
+            if(StringSubstr(json, bool_start, 4) == "true")
+                return "true";
+            else if(StringSubstr(json, bool_start, 5) == "false")
+                return "false";
+        }
+        
         return "";
+    }
     
     start_pos += StringLen(search_pattern);
     int end_pos = StringFind(json, "\"", start_pos);
@@ -481,6 +599,10 @@ double ExtractJsonDouble(string json, string key)
     
     start_pos += StringLen(search_pattern);
     
+    // null値のチェック
+    if(StringSubstr(json, start_pos, 4) == "null")
+        return 0.0;
+    
     // 数値の終端を見つける
     int end_pos = start_pos;
     string char_at_pos;
@@ -494,6 +616,10 @@ double ExtractJsonDouble(string json, string key)
     }
     
     string number_str = StringSubstr(json, start_pos, end_pos - start_pos);
+    
+    // 文字列をトリム
+    StringReplace(number_str, " ", "");
+    
     return StringToDouble(number_str);
 }
 
@@ -504,9 +630,9 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
 {
     if(id == CHARTEVENT_KEYDOWN)
     {
-        if(lparam == 83) // 'S'キー
+        if(lparam == 83) // 'S'キー - 統計表示
         {
-            Print("=== API接続統計 ===");
+            Print("=== ", current_symbol, " API接続統計 ===");
             Print("総API呼び出し: ", total_api_calls);
             Print("成功呼び出し: ", successful_api_calls);
             if(total_api_calls > 0)
@@ -514,11 +640,25 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
             Print("連続失敗: ", consecutive_failures);
             Print("API利用可能: ", api_available ? "YES" : "NO");
             Print("最終成功時刻: ", TimeToString(last_successful_connection));
+            Print("最新シグナル: ", last_signal);
+            Print("最新信頼度: ", DoubleToString(last_confidence, 3));
+            if(last_predicted_price > 0)
+                Print("最新予測価格: ", DoubleToString(last_predicted_price, 5));
             
             if(UseAccountManager)
             {
                 g_AccountManager.PrintStatus();
             }
+        }
+        else if(lparam == 84) // 'T'キー - テスト送信
+        {
+            Print("=== ", current_symbol, " テスト送信実行 ===");
+            SendTickData();
+        }
+        else if(lparam == 67) // 'C'キー - シンボル状態チェック
+        {
+            Print("=== ", current_symbol, " 状態チェック ===");
+            CheckSymbolStatus();
         }
     }
 }
