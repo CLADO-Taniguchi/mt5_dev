@@ -236,7 +236,7 @@ class EnsembleModel:
         ensemble_pred = self.meta_model.predict(meta_features)
         return ensemble_pred
 
-class TradingMLSystem:
+class MLTradingSystem:
     """メイン取引機械学習システムクラス"""
     
     def __init__(self):
@@ -406,7 +406,7 @@ if __name__ == "__main__":
     })
     
     # システム初期化とテスト
-    ml_system = TradingMLSystem()
+    ml_system = MLTradingSystem()
     
     print("機械学習システムのテスト開始...")
     try:

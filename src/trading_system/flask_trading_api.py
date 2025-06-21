@@ -1,5 +1,6 @@
 import sys
 import os
+import pytz
 
 # 現在のディレクトリをパスに追加
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,14 +18,14 @@ from pathlib import Path
 
 # 機械学習システムのインポート（エラーハンドリング付き）
 try:
-    from ml_trading_system import TradingMLSystem
+    from ml_trading_system import MLTradingSystem
     ML_SYSTEM_AVAILABLE = True
 except ImportError as e:
     print(f"警告: ml_trading_system のインポートに失敗しました: {e}")
     print("基本的なAPIサーバーとして動作します")
     ML_SYSTEM_AVAILABLE = False
     # ダミークラスを定義
-    class TradingMLSystem:
+    class MLTradingSystem:
         def __init__(self):
             pass
         def load_model(self, path):
@@ -34,7 +35,7 @@ except ImportError as e:
 
 # ログ設定
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('trading_api.log', encoding='utf-8'),
@@ -45,7 +46,7 @@ logging.basicConfig(
 app = Flask(__name__)
 
 class SymbolDataManager:
-    """通貨ペア別データ管理クラス"""
+    """市場停止時を考慮した通貨ペア別データ管理クラス"""
     
     def __init__(self, base_dir, symbol, max_buffer_size=1000):
         self.symbol = symbol
@@ -66,8 +67,63 @@ class SymbolDataManager:
         self.last_backup_time = datetime.now()
         self.backup_interval = 300  # 5分
         
+        # 市場停止対応
+        self.last_unique_data = None
+        self.duplicate_count = 0
+        self.market_timezone = pytz.timezone('America/New_York')  # NYSE基準
+        
         # 起動時にデータ読み込み
         self.load_current_data()
+    
+    def is_market_open(self, timestamp=None):
+        """市場開放時間チェック（現在時刻ベース）"""
+        try:
+            # 現在時刻をNY時間で取得
+            current_ny_time = datetime.now(self.market_timezone)
+            weekday = current_ny_time.weekday()  # 0=月曜, 6=日曜
+            hour = current_ny_time.hour
+            
+            # デバッグログ追加
+            #logging.debug(f"[{self.symbol}] 市場判定DEBUG: current_ny_time={current_ny_time}, weekday={weekday}, hour={hour}")
+            
+            # 土日は休場
+            if weekday >= 5:  # 土曜(5), 日曜(6)
+                logging.debug(f"[{self.symbol}] 土日のため休場")
+                return False
+            
+            # 金曜日は21:00まで (NY時間)
+            if weekday == 4 and hour >= 21:
+                logging.debug(f"[{self.symbol}] 金曜21時以降のため休場")
+                return False
+                
+            # 日曜日17:00前は休場 (NY時間)
+            if weekday == 0 and hour < 17:
+                logging.debug(f"[{self.symbol}] 日曜17時前のため休場")
+                return False
+                
+            logging.debug(f"[{self.symbol}] 市場開放中")
+            return True
+            
+        except Exception as e:
+            logging.warning(f"[{self.symbol}] 市場時間判定エラー: {e}")
+            return True  # エラー時はデータを受け入れる
+    
+    def is_duplicate_data(self, tick_data):
+        """重複データ判定（より厳密）"""
+        if len(self.data_buffer) == 0:
+            return False
+            
+        last_item = self.data_buffer[-1]
+        
+        # すべての主要フィールドが同じかチェック
+        return (
+            last_item['datetime'] == tick_data['datetime'] and
+            last_item['open'] == tick_data['open'] and
+            last_item['high'] == tick_data['high'] and
+            last_item['low'] == tick_data['low'] and
+            last_item['close'] == tick_data['close'] and
+            last_item['volume'] == tick_data['volume']
+        )
     
     def save_data(self):
         """現在のデータを保存"""
@@ -124,7 +180,7 @@ class SymbolDataManager:
             self.data_buffer = []
     
     def add_data(self, tick_data):
-        """ティックデータを追加"""
+        """市場状況を考慮したティックデータ追加"""
         try:
             # データ検証
             required_fields = ['datetime', 'open', 'high', 'low', 'close', 'volume']
@@ -136,13 +192,56 @@ class SymbolDataManager:
             if isinstance(tick_data['datetime'], str):
                 tick_data['datetime'] = pd.to_datetime(tick_data['datetime'])
             
+            # 市場開放時間チェック
+            market_open = self.is_market_open(tick_data['datetime'])
+            
+            # 重複データチェック
+            is_duplicate = self.is_duplicate_data(tick_data)
+
+            # デバッグログ追加 - ここから
+            #logging.debug(f"[{self.symbol}] DEBUG: is_duplicate={is_duplicate}, duplicate_count={self.duplicate_count}")
+            #logging.debug(f"[{self.symbol}] DEBUG: market_open={market_open}")
+            #if len(self.data_buffer) > 0:
+            #    last_item = self.data_buffer[-1]
+            #    logging.debug(f"[{self.symbol}] DEBUG: last_datetime={last_item['datetime']}, new_datetime={tick_data['datetime']}")
+            #    logging.debug(f"[{self.symbol}] DEBUG: last_close={last_item['close']}, new_close={tick_data['close']}")
+            #    logging.debug(f"[{self.symbol}] DEBUG: datetime_equal={last_item['datetime'] == tick_data['datetime']}")
+            #    logging.debug(f"[{self.symbol}] DEBUG: close_equal={last_item['close'] == tick_data['close']}")
+            # デバッグログ追加 - ここまで
+            
+            if is_duplicate:
+                self.duplicate_count += 1
+                
+                # 市場休場中の重複データは制限
+                if not market_open:
+                    if self.duplicate_count > 10:  # 10回以上の重複はスキップ
+                        logging.debug(f"[{self.symbol}] 休場中重複データスキップ (#{self.duplicate_count})")
+                        return True
+                
+                # 市場開放中でも過度な重複は制限
+                elif self.duplicate_count > 3:
+                    logging.debug(f"[{self.symbol}] 重複データスキップ (#{self.duplicate_count})")
+                    return True
+            else:
+                self.duplicate_count = 0  # 新しいデータでカウントリセット
+            
             # バッファに追加
             self.data_buffer.append(tick_data)
             
-            # バッファサイズ制限とアーカイブ処理
-            if len(self.data_buffer) > self.max_buffer_size:
+            # ログメッセージ調整
+            if market_open:
+                logging.info(f"[{self.symbol}] ティックデータ追加: {tick_data['datetime']}, Close: {tick_data['close']}")
+            else:
+                logging.debug(f"[{self.symbol}] 休場中データ: {tick_data['datetime']}, Close: {tick_data['close']}")
+            
+            # バッファサイズ管理（市場状況に応じて調整）
+            if market_open:
+                max_size = self.max_buffer_size
+            else:
+                max_size = self.max_buffer_size // 10  # 休場中は1/10に制限
+            
+            if len(self.data_buffer) > max_size + 50:
                 self.archive_old_data()
-                self.data_buffer = self.data_buffer[-self.max_buffer_size:]
             
             # 自動バックアップチェック
             self.auto_backup_check()
@@ -154,30 +253,61 @@ class SymbolDataManager:
             return False
     
     def archive_old_data(self):
-        """古いデータをアーカイブ"""
+        """改良版アーカイブ処理"""
         try:
-            if len(self.data_buffer) <= self.max_buffer_size:
+            current_max = self.max_buffer_size
+            
+            # 現在が休場中なら制限を厳しく
+            if len(self.data_buffer) > 0:
+                last_time = self.data_buffer[-1]['datetime']
+                if not self.is_market_open(last_time):
+                    current_max = self.max_buffer_size // 10
+            
+            if len(self.data_buffer) <= current_max:
                 return
             
-            # アーカイブ対象データ（古い500件）
-            archive_data = self.data_buffer[:-self.max_buffer_size]
+            # アーカイブ対象データ
+            excess_count = len(self.data_buffer) - current_max
+            archive_data = self.data_buffer[:excess_count]
+            
+            if len(archive_data) == 0:
+                return
+            
+            # 重複データが多い場合は簡潔なアーカイブ
+            unique_dates = set()
+            for item in archive_data:
+                unique_dates.add(pd.to_datetime(item['datetime']).date())
+            
+            if len(unique_dates) == 1 and excess_count > 100:
+                # 同じ日のデータが大量にある場合（休場中の重複データ）
+                sample_data = archive_data[::10]  # 10件おきにサンプリング
+                logging.info(f"[{self.symbol}] 休場中重複データをサンプリングアーカイブ: {len(archive_data)}件 -> {len(sample_data)}件")
+                archive_data = sample_data
+            
+            if len(archive_data) == 0:
+                self.data_buffer = self.data_buffer[excess_count:]
+                return
+            
             archive_df = pd.DataFrame(archive_data)
             
-            if len(archive_df) == 0:
-                return
+            # ファイル名生成
+            first_date = pd.to_datetime(archive_df['datetime'].iloc[0]).strftime('%Y%m%d_%H%M')
+            last_date = pd.to_datetime(archive_df['datetime'].iloc[-1]).strftime('%Y%m%d_%H%M')
+            timestamp = datetime.now().strftime('%H%M%S')
             
-            # アーカイブファイル名（日付ベース）
-            first_date = pd.to_datetime(archive_df['datetime'].iloc[0]).strftime('%Y%m%d')
-            last_date = pd.to_datetime(archive_df['datetime'].iloc[-1]).strftime('%Y%m%d')
-            archive_filename = f"{self.symbol}_{first_date}_{last_date}.csv"
+            market_status = "closed" if not self.is_market_open(archive_df['datetime'].iloc[0]) else "open"
+            archive_filename = f"{self.symbol}_{first_date}_{last_date}_{market_status}_{timestamp}.csv"
             archive_path = self.archive_dir / archive_filename
             
-            # datetime列を文字列に変換してアーカイブ
+            # アーカイブ保存
             archive_df['datetime'] = pd.to_datetime(archive_df['datetime']).dt.strftime('%Y-%m-%d %H:%M:%S')
             archive_df['symbol'] = self.symbol
             archive_df.to_csv(archive_path, index=False, encoding='utf-8')
             
-            logging.info(f"[{self.symbol}] 古いデータをアーカイブ: {len(archive_data)}件 -> {archive_filename}")
+            logging.info(f"[{self.symbol}] アーカイブ完了: {len(archive_data)}件 -> {archive_filename}")
+            
+            # バッファクリア
+            self.data_buffer = self.data_buffer[excess_count:]
             
         except Exception as e:
             logging.error(f"[{self.symbol}] アーカイブエラー: {e}")
@@ -219,19 +349,27 @@ class SymbolDataManager:
             except:
                 pass
         
+        # 市場状況を追加
+        market_status = "Unknown"
+        if len(self.data_buffer) > 0:
+            last_time = self.data_buffer[-1]['datetime']
+            market_status = "Open" if self.is_market_open(last_time) else "Closed"
+        
         return {
             'symbol': self.symbol,
             'current_buffer_size': current_size,
             'archive_files': archive_count,
             'total_archived_records': total_archived,
             'total_records': current_size + total_archived,
-            'last_backup': self.last_backup_time.isoformat()
+            'last_backup': self.last_backup_time.isoformat(),
+            'market_status': market_status,
+            'duplicate_count': self.duplicate_count
         }
 
 class TradingAPIServer:
     def __init__(self):
         if ML_SYSTEM_AVAILABLE:
-            self.ml_system = TradingMLSystem()
+            self.ml_system = MLTradingSystem()
         else:
             self.ml_system = None
             
@@ -297,10 +435,7 @@ class TradingAPIServer:
         """ティックデータを追加"""
         manager = self.get_symbol_manager(symbol)
         success = manager.add_data(tick_data)
-        
-        if success:
-            logging.info(f"[{symbol}] ティックデータ追加: {tick_data['datetime']}, Close: {tick_data['close']}")
-        
+                
         return success
     
     def generate_trading_signal(self, symbol):
