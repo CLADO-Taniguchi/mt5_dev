@@ -1,78 +1,94 @@
-import pandas as pd
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Unix timestamp を datetime に変換するスクリプト
+"""
 
-def convert_unix_to_datetime():
-    """timeカラムのUnixタイムスタンプをdatetimeに変換"""
+import pandas as pd
+from datetime import datetime
+import sys
+
+def convert_unix_to_datetime(input_file, output_file=None):
+    """
+    CSVファイルのUnix timestampをdatetimeに変換
+    
+    Args:
+        input_file (str): 入力CSVファイルのパス
+        output_file (str): 出力CSVファイルのパス（Noneの場合は上書き）
+    """
     try:
-        # CSVファイル読み込み（BOM対応）
-        csv_file = 'C:/MT5_portable/MQL5/Files/backtest_hma_20250613235959_split.csv'  # ファイル名を適宜変更
-        print(f"ファイルを読み込み中: {csv_file}")
+        # CSVファイルを読み込み
+        print(f"ファイル読み込み中: {input_file}")
+        df = pd.read_csv(input_file)
         
-        # BOM付きファイルに対応するため、encoding指定で読み込み
-        df = pd.read_csv(csv_file, encoding='utf-8-sig')
+        # datetime列を探す
+        datetime_columns = []
+        for col in df.columns:
+            if 'datetime' in col.lower() or 'time' in col.lower():
+                datetime_columns.append(col)
         
-        print(f"データ件数: {len(df)}")
-        print(f"カラム名: {list(df.columns)}")
-        
-        # カラム名の前後の空白を除去（BOM対策）
-        df.columns = df.columns.str.strip()
-        print(f"クリーンアップ後のカラム名: {list(df.columns)}")
-        
-        print("/n最初の3行（変換前）:")
-        print(df.head(3))
-        
-        # timeカラムが存在するかチェック
-        if 'time' not in df.columns:
-            print("エラー: 'time'カラムが見つかりません")
-            print(f"利用可能なカラム: {list(df.columns)}")
+        if not datetime_columns:
+            print("datetime列が見つかりません")
             return False
         
-        # unix_timeをdatetimeに変換
-        print("Unixタイムスタンプを変換中...")
-        df['datetime'] = pd.to_datetime(df['time'], unit='s')
+        print(f"変換対象列: {datetime_columns}")
         
-        # timeカラムを削除してdatetimeカラムを先頭に移動
-        df = df.drop('time', axis=1)
-        columns = ['datetime'] + [col for col in df.columns if col != 'datetime']
-        df = df[columns]
+        # 各datetime列を変換
+        for col in datetime_columns:
+            try:
+                # Unix timestampとして解釈して変換
+                df[col] = pd.to_datetime(df[col], unit='s')
+                print(f"列 '{col}' を変換しました")
+            except Exception as e:
+                print(f"列 '{col}' の変換に失敗: {e}")
+                # 既にdatetime形式の場合はスキップ
+                try:
+                    df[col] = pd.to_datetime(df[col])
+                    print(f"列 '{col}' は既にdatetime形式でした")
+                except:
+                    print(f"列 '{col}' は変換できませんでした")
         
-        # 新しいCSVファイルに保存（BOMなしで出力）
-        output_file = 'backtest_results_converted.csv'
-        df.to_csv(output_file, index=False, encoding='utf-8')
+        # 出力ファイル名を決定
+        if output_file is None:
+            output_file = input_file.replace('.csv', '_converted.csv')
         
-        print(f"\n✅ 変換完了！")
-        print(f"📁 出力ファイル: {output_file}")
-        print(f"📊 データ件数: {len(df)}")
-        print("\n🔍 変換後の最初の5行:")
-        print(df.head())
+        # 変換されたデータを保存
+        df.to_csv(output_file, index=False)
         
-        # 統計情報
-        if 'isWin' in df.columns:
-            win_count = (df['isWin'] == 'WIN').sum()
-            total_trades = len(df)
-            win_rate = (win_count / total_trades) * 100 if total_trades > 0 else 0
-            print(f"\n📈 統計情報:")
-            print(f"   勝利数: {win_count}/{total_trades} ({win_rate:.1f}%)")
-        
-        # 時間範囲
-        print(f"   期間: {df['datetime'].min()} ～ {df['datetime'].max()}")
+        print(f"\nSUCCESS: 変換完了！")
+        print(f"出力ファイル: {output_file}")
+        print(f"変換された行数: {len(df)}")
         
         return True
         
     except FileNotFoundError:
-        print(f"エラー: ファイルが見つかりません: {csv_file}")
-        print("ファイル名を確認してください。")
+        print(f"ファイルが見つかりません: {input_file}")
         return False
     except Exception as e:
-        print(f"エラー: {str(e)}")
+        print(f"エラーが発生しました: {e}")
         return False
 
+def main():
+    """メイン関数"""
+    if len(sys.argv) < 2:
+        print("使用方法: python unix_to_datetime.py <入力ファイル> [出力ファイル]")
+        print("例: python unix_to_datetime.py data.csv")
+        print("例: python unix_to_datetime.py data.csv converted_data.csv")
+        return
+    
+    input_file = sys.argv[1]
+    output_file = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    print("Unix timestamp から datetime への変換を開始します...")
+    print(f"入力ファイル: {input_file}")
+    if output_file:
+        print(f"出力ファイル: {output_file}")
+    
+    success = convert_unix_to_datetime(input_file, output_file)
+    
+    if not success:
+        print("\nERROR: 変換に失敗しました。")
+        sys.exit(1)
+
 if __name__ == "__main__":
-    print("=== Unixタイムスタンプ → Datetime変換ツール ===\n")
-    
-    success = convert_unix_to_datetime()
-    
-    if success:
-        print("\n✨ 変換が完了しました！")
-        print("📁 'backtest_results_converted.csv' ファイルを確認してください。")
-    else:
-        print("\n❌ 変換に失敗しました。")
+    main()

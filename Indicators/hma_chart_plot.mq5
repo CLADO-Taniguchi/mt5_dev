@@ -1,7 +1,8 @@
 #property indicator_chart_window
-#property indicator_buffers 4
-#property indicator_plots   3
+#property indicator_buffers 6
+#property indicator_plots   5
 
+// HMA設定
 input int Period = 21;
 input bool ShowAlerts = true;        // アラート表示
 input bool ShowArrows = true;        // 矢印表示
@@ -11,15 +12,36 @@ input int LabelFontSize = 8;         // ラベルフォントサイズ
 input color EntryLabelColor = clrWhite;   // エントリーラベル色
 input color ExitLabelColor = clrWhite;     // エグジットラベル色
 
+// 市場状態判定設定
+input int ADX_Period = 14;           // ADX期間
+input double ADX_Threshold = 25;     // ADXトレンド閾値
+input int ATR_Period = 14;           // ATR期間
+input int MA_Period = 20;            // 移動平均期間
+input double Volatility_Threshold = 0.5; // ボラティリティ閾値
+input int BB_Period = 20;            // ボリンジャーバンド期間
+input double BB_Deviation = 2.0;     // ボリンジャーバンド標準偏差
+input int Trend_Strength_Period = 10; // トレンド強度期間
+
+// バッファ
 double hmaBuffer[];      // HMAライン
 double hmaColors[];      // 色インデックス
 double buySignalBuffer[]; // BUYシグナル
 double sellSignalBuffer[]; // SELLシグナル
+double marketConditionBuffer[]; // 市場状態（0=レンジ, 1=トレンド）
+double confidenceBuffer[]; // 信頼度
 
 // ENTRY/EXIT管理用変数
 int entryCounter = 0;    // エントリーカウンター
 int exitCounter = 0;     // エグジットカウンター
 bool hasOpenPosition = false; // ポジション保有状態
+
+// 市場状態構造体
+struct MarketCondition
+{
+    bool isTrending;
+    double confidence;  // 0.0-1.0の信頼度
+    string condition;   // 状態文字列
+};
 
 int OnInit()
 {
@@ -50,15 +72,29 @@ int OnInit()
     PlotIndexSetInteger(2, PLOT_LINE_WIDTH, ArrowSize);
     PlotIndexSetString(2, PLOT_LABEL, "SELL Signal");
 
+    // 市場状態設定
+    SetIndexBuffer(4, marketConditionBuffer, INDICATOR_DATA);
+    PlotIndexSetInteger(3, PLOT_DRAW_TYPE, DRAW_NONE);
+    PlotIndexSetString(3, PLOT_LABEL, "Market Condition");
+
+    // 信頼度設定
+    SetIndexBuffer(5, confidenceBuffer, INDICATOR_DATA);
+    PlotIndexSetInteger(4, PLOT_DRAW_TYPE, DRAW_NONE);
+    PlotIndexSetString(4, PLOT_LABEL, "Confidence");
+
     // 配列設定
     ArraySetAsSeries(hmaBuffer, false);
     ArraySetAsSeries(hmaColors, false);
     ArraySetAsSeries(buySignalBuffer, false);
     ArraySetAsSeries(sellSignalBuffer, false);
+    ArraySetAsSeries(marketConditionBuffer, false);
+    ArraySetAsSeries(confidenceBuffer, false);
 
     // バッファを空の値で初期化
     ArrayInitialize(buySignalBuffer, EMPTY_VALUE);
     ArrayInitialize(sellSignalBuffer, EMPTY_VALUE);
+    ArrayInitialize(marketConditionBuffer, EMPTY_VALUE);
+    ArrayInitialize(confidenceBuffer, EMPTY_VALUE);
     
     // カウンター初期化
     entryCounter = 0;
@@ -80,6 +116,60 @@ void OnDeinit(const int reason)
             ObjectDelete(0, objName);
         }
     }
+}
+
+// 市場状態分析関数
+MarketCondition AnalyzeMarketCondition(int shift)
+{
+    MarketCondition result;
+    result.isTrending = false;
+    result.confidence = 0.0;
+    result.condition = "UNKNOWN";
+    
+    // 1. ADX判定
+    double adx = iADX(_Symbol, PERIOD_CURRENT, ADX_Period, PRICE_CLOSE, MODE_MAIN, shift);
+    bool adx_trending = adx > ADX_Threshold;
+    
+    // 2. ボラティリティ判定
+    double atr = iATR(_Symbol, PERIOD_CURRENT, ATR_Period, shift);
+    double ma = iMA(_Symbol, PERIOD_CURRENT, MA_Period, 0, MODE_SMA, PRICE_CLOSE, shift);
+    double volatility_ratio = atr / ma * 100;
+    bool volatility_trending = volatility_ratio > Volatility_Threshold;
+    
+    // 3. ボリンジャーバンド判定
+    double bb_upper = iBands(_Symbol, PERIOD_CURRENT, BB_Period, BB_Deviation, 0, PRICE_CLOSE, MODE_UPPER, shift);
+    double bb_lower = iBands(_Symbol, PERIOD_CURRENT, BB_Period, BB_Deviation, 0, PRICE_CLOSE, MODE_LOWER, shift);
+    double bb_width = bb_upper - bb_lower;
+    double bb_width_ma = iMA(_Symbol, PERIOD_CURRENT, BB_Period, 0, MODE_SMA, bb_width, shift);
+    bool bb_trending = bb_width > bb_width_ma * 1.2;
+    
+    // 4. 価格位置判定
+    double close = iClose(_Symbol, PERIOD_CURRENT, shift);
+    double bb_position = (close - bb_lower) / (bb_upper - bb_lower);
+    bool price_extreme = bb_position < 0.2 || bb_position > 0.8;
+    
+    // 総合判定
+    int trend_signals = 0;
+    if(adx_trending) trend_signals++;
+    if(volatility_trending) trend_signals++;
+    if(bb_trending) trend_signals++;
+    if(price_extreme) trend_signals++;
+    
+    result.isTrending = trend_signals >= 2;
+    result.confidence = (double)trend_signals / 4.0;
+    
+    if(result.isTrending)
+    {
+        if(result.confidence >= 0.75) result.condition = "STRONG_TREND";
+        else result.condition = "WEAK_TREND";
+    }
+    else
+    {
+        if(result.confidence <= 0.25) result.condition = "STRONG_RANGE";
+        else result.condition = "WEAK_RANGE";
+    }
+    
+    return result;
 }
 
 int OnCalculate(
@@ -124,6 +214,11 @@ int OnCalculate(
     {
         hmaBuffer[i] = WMA(i, sqrtPeriod, rawWMA);
 
+        // 市場状態分析
+        MarketCondition market = AnalyzeMarketCondition(i);
+        marketConditionBuffer[i] = market.isTrending ? 1.0 : 0.0;
+        confidenceBuffer[i] = market.confidence;
+
         // トレンド方向を判定
         if (i > 0 && hmaBuffer[i] != 0.0 && hmaBuffer[i - 1] != 0.0)
         {
@@ -144,13 +239,20 @@ int OnCalculate(
                     string labelText = "";
                     color labelColor;
                     double labelPrice;
+                    bool shouldTrade = false;
                     
-                    if (!hasOpenPosition)
+                    // 市場状態に基づく取引判断
+                    if(market.isTrending && market.confidence > 0.5)
                     {
-                        // 新規エントリー
+                        shouldTrade = true;
+                    }
+                    
+                    if (!hasOpenPosition && shouldTrade)
+                    {
+                        // 新規エントリー（トレンド相場のみ）
                         entryCounter++;
                         labelName = "E_" + IntegerToString(entryCounter);
-                        labelText = "E_" + IntegerToString(entryCounter);
+                        labelText = "E_" + IntegerToString(entryCounter) + "(" + market.condition + ")";
                         hasOpenPosition = true;
                         
                         if (currentTrend == 0)  // BUYエントリー
@@ -162,7 +264,7 @@ int OnCalculate(
                             
                             if (ShowAlerts && i == rates_total - 1)
                             {
-                                Alert("HMA BUY Entry E_", entryCounter, " at ", _Symbol);
+                                Alert("HMA BUY Entry E_", entryCounter, " (", market.condition, ") at ", _Symbol);
                             }
                         }
                         else  // SELLエントリー
@@ -174,49 +276,52 @@ int OnCalculate(
                             
                             if (ShowAlerts && i == rates_total - 1)
                             {
-                                Alert("HMA SELL Entry E_", entryCounter, " at ", _Symbol);
+                                Alert("HMA SELL Entry E_", entryCounter, " (", market.condition, ") at ", _Symbol);
                             }
                         }
                     }
-                    else
+                    else if (hasOpenPosition)
                     {
-                        // ポジション決済のみ（新規エントリーはしない）
+                        // ポジション決済（市場状態に関係なく）
                         exitCounter++;
                         labelName = "X_" + IntegerToString(exitCounter);
-                        labelText = "X_" + IntegerToString(exitCounter);
-                        hasOpenPosition = false;  // ポジションクローズ
+                        labelText = "X_" + IntegerToString(exitCounter) + "(" + market.condition + ")";
+                        hasOpenPosition = false;
                         
                         if (currentTrend == 0)  // BUYシグナルで決済（前のSELLポジション決済）
                         {
                             buySignalBuffer[i] = low[i] - (high[i] - low[i]) * 0.3;
                             sellSignalBuffer[i] = EMPTY_VALUE;
-                            labelPrice = high[i] + (high[i] - low[i]) * 0.8;  // EXITは上側に配置
+                            labelPrice = high[i] + (high[i] - low[i]) * 0.8;
                             labelColor = ExitLabelColor;
                             
                             if (ShowAlerts && i == rates_total - 1)
                             {
-                                Alert("HMA EXIT X_", exitCounter, " (SELL position closed) at ", _Symbol);
+                                Alert("HMA EXIT X_", exitCounter, " (", market.condition, ") at ", _Symbol);
                             }
                         }
                         else  // SELLシグナルで決済（前のBUYポジション決済）
                         {
                             sellSignalBuffer[i] = high[i] + (high[i] - low[i]) * 0.3;
                             buySignalBuffer[i] = EMPTY_VALUE;
-                            labelPrice = low[i] - (high[i] - low[i]) * 0.8;  // EXITは下側に配置
+                            labelPrice = low[i] - (high[i] - low[i]) * 0.8;
                             labelColor = ExitLabelColor;
                             
                             if (ShowAlerts && i == rates_total - 1)
                             {
-                                Alert("HMA EXIT X_", exitCounter, " (BUY position closed) at ", _Symbol);
+                                Alert("HMA EXIT X_", exitCounter, " (", market.condition, ") at ", _Symbol);
                             }
                         }
-                        
-                        // 新規エントリーは次の反転まで待機
-                        // hasOpenPosition = false のまま
+                    }
+                    else
+                    {
+                        // レンジ相場でエントリーしない場合
+                        buySignalBuffer[i] = EMPTY_VALUE;
+                        sellSignalBuffer[i] = EMPTY_VALUE;
                     }
                     
                     // ラベル作成
-                    if (ShowLabels)
+                    if (ShowLabels && (shouldTrade || hasOpenPosition))
                     {
                         ObjectCreate(0, labelName, OBJ_TEXT, 0, time[i], labelPrice);
                         ObjectSetString(0, labelName, OBJPROP_TEXT, labelText);
