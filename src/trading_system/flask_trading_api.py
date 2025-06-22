@@ -2,7 +2,7 @@ import sys
 import os
 import pytz
 
-# 現在のディレクトリをパスに追加
+# ???????????????
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
@@ -16,15 +16,15 @@ import threading
 import time
 from pathlib import Path
 
-# 機械学習システムのインポート（エラーハンドリング付き）
+# ??????????????(???????????)
 try:
     from ml_trading_system import MLTradingSystem
     ML_SYSTEM_AVAILABLE = True
 except ImportError as e:
-    print(f"警告: ml_trading_system のインポートに失敗しました: {e}")
-    print("基本的なAPIサーバーとして動作します")
+    print(f"??: ml_trading_system ?????????????: {e}")
+    print("????API????????????")
     ML_SYSTEM_AVAILABLE = False
-    # ダミークラスを定義
+    # ?????????
     class MLTradingSystem:
         def __init__(self):
             pass
@@ -33,7 +33,7 @@ except ImportError as e:
         def generate_signal(self, df, price):
             return "HOLD", 0.0, None, "ML system not available"
 
-# ログ設定
+# ????
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -46,76 +46,76 @@ logging.basicConfig(
 app = Flask(__name__)
 
 class SymbolDataManager:
-    """市場停止時を考慮した通貨ペア別データ管理クラス"""
+    """???????????????????????"""
     
     def __init__(self, base_dir, symbol, max_buffer_size=1000):
         self.symbol = symbol
         self.base_dir = Path(base_dir)
         self.max_buffer_size = max_buffer_size
         
-        # シンボル専用ディレクトリ作成
+        # ??????????????
         self.symbol_dir = self.base_dir / "data" / symbol
         self.symbol_dir.mkdir(parents=True, exist_ok=True)
         
-        # ファイルパス設定
+        # ????????
         self.current_file = self.symbol_dir / f"{symbol}_current.csv"
         self.archive_dir = self.symbol_dir / "archive"
         self.archive_dir.mkdir(exist_ok=True)
         
-        # メモリバッファ
+        # ???????
         self.data_buffer = []
         self.last_backup_time = datetime.now()
-        self.backup_interval = 300  # 5分
+        self.backup_interval = 300  # 5?
         
-        # 市場停止対応
+        # ??????
         self.last_unique_data = None
         self.duplicate_count = 0
-        self.market_timezone = pytz.timezone('America/New_York')  # NYSE基準
+        self.market_timezone = pytz.timezone('America/New_York')  # NYSE??
         
-        # 起動時にデータ読み込み
+        # ???????????
         self.load_current_data()
     
     def is_market_open(self, timestamp=None):
-        """市場開放時間チェック（現在時刻ベース）"""
+        """??????????(???????)"""
         try:
-            # 現在時刻をNY時間で取得
+            # ?????NY?????
             current_ny_time = datetime.now(self.market_timezone)
-            weekday = current_ny_time.weekday()  # 0=月曜, 6=日曜
+            weekday = current_ny_time.weekday()  # 0=??, 6=??
             hour = current_ny_time.hour
             
-            # デバッグログ追加
-            #logging.debug(f"[{self.symbol}] 市場判定DEBUG: current_ny_time={current_ny_time}, weekday={weekday}, hour={hour}")
+            # ????????
+            #logging.debug(f"[{self.symbol}] ????DEBUG: current_ny_time={current_ny_time}, weekday={weekday}, hour={hour}")
             
-            # 土日は休場
-            if weekday >= 5:  # 土曜(5), 日曜(6)
-                logging.debug(f"[{self.symbol}] 土日のため休場")
+            # ?????
+            if weekday >= 5:  # ??(5), ??(6)
+                logging.debug(f"[{self.symbol}] ???????")
                 return False
             
-            # 金曜日は21:00まで (NY時間)
+            # ????21:00?? (NY??)
             if weekday == 4 and hour >= 21:
-                logging.debug(f"[{self.symbol}] 金曜21時以降のため休場")
+                logging.debug(f"[{self.symbol}] ??21????????")
                 return False
                 
-            # 日曜日17:00前は休場 (NY時間)
+            # ???17:00???? (NY??)
             if weekday == 0 and hour < 17:
-                logging.debug(f"[{self.symbol}] 日曜17時前のため休場")
+                logging.debug(f"[{self.symbol}] ??17???????")
                 return False
                 
-            logging.debug(f"[{self.symbol}] 市場開放中")
+            logging.debug(f"[{self.symbol}] ?????")
             return True
             
         except Exception as e:
-            logging.warning(f"[{self.symbol}] 市場時間判定エラー: {e}")
-            return True  # エラー時はデータを受け入れる
+            logging.warning(f"[{self.symbol}] ?????????: {e}")
+            return True  # ??????????????
     
     def is_duplicate_data(self, tick_data):
-        """重複データ判定（より厳密）"""
+        """???????(????)"""
         if len(self.data_buffer) == 0:
             return False
             
         last_item = self.data_buffer[-1]
         
-        # すべての主要フィールドが同じかチェック
+        # ???????????????????
         return (
             last_item['datetime'] == tick_data['datetime'] and
             last_item['open'] == tick_data['open'] and
@@ -126,32 +126,32 @@ class SymbolDataManager:
         )
     
     def save_data(self):
-        """現在のデータを保存"""
+        """?????????"""
         try:
             if len(self.data_buffer) == 0:
                 return
             
             df = pd.DataFrame(self.data_buffer)
             
-            # datetime列を文字列に変換
+            # datetime????????
             if 'datetime' in df.columns:
                 df['datetime'] = pd.to_datetime(df['datetime']).dt.strftime('%Y-%m-%d %H:%M:%S')
             
-            # symbolカラムを追加
+            # symbol??????
             df['symbol'] = self.symbol
             
             df.to_csv(self.current_file, index=False, encoding='utf-8')
-            logging.info(f"[{self.symbol}] データ保存: {len(self.data_buffer)}件 -> {self.current_file}")
+            logging.info(f"[{self.symbol}] ?????: {len(self.data_buffer)}? -> {self.current_file}")
             self.last_backup_time = datetime.now()
             
         except Exception as e:
-            logging.error(f"[{self.symbol}] データ保存エラー: {e}")
+            logging.error(f"[{self.symbol}] ????????: {e}")
     
     def load_current_data(self):
-        """現在のデータを読み込み"""
+        """???????????"""
         try:
             if not self.current_file.exists():
-                logging.info(f"[{self.symbol}] バックアップファイルが見つかりません")
+                logging.info(f"[{self.symbol}] ??????????????????")
                 return
             
             df = pd.read_csv(self.current_file, encoding='utf-8')
@@ -159,46 +159,46 @@ class SymbolDataManager:
             if len(df) == 0:
                 return
             
-            # datetime列を復元
+            # datetime????
             if 'datetime' in df.columns:
                 df['datetime'] = pd.to_datetime(df['datetime'])
             
-            # symbolカラムを除去してバッファに復元
+            # symbol???????????????
             if 'symbol' in df.columns:
                 df = df.drop('symbol', axis=1)
             
             self.data_buffer = df.to_dict('records')
             
-            # バッファサイズ制限
+            # ?????????
             if len(self.data_buffer) > self.max_buffer_size:
                 self.data_buffer = self.data_buffer[-self.max_buffer_size:]
             
-            logging.info(f"[{self.symbol}] データ復元: {len(self.data_buffer)}件")
+            logging.info(f"[{self.symbol}] ?????: {len(self.data_buffer)}?")
             
         except Exception as e:
-            logging.error(f"[{self.symbol}] データ読み込みエラー: {e}")
+            logging.error(f"[{self.symbol}] ??????????: {e}")
             self.data_buffer = []
     
     def add_data(self, tick_data):
-        """市場状況を考慮したティックデータ追加"""
+        """??????????????????"""
         try:
-            # データ検証
+            # ?????
             required_fields = ['datetime', 'open', 'high', 'low', 'close', 'volume']
             for field in required_fields:
                 if field not in tick_data:
-                    raise ValueError(f"必須フィールドが不足: {field}")
+                    raise ValueError(f"??????????: {field}")
             
-            # タイムスタンプの正規化
+            # ???????????
             if isinstance(tick_data['datetime'], str):
                 tick_data['datetime'] = pd.to_datetime(tick_data['datetime'])
             
-            # 市場開放時間チェック
+            # ??????????
             market_open = self.is_market_open(tick_data['datetime'])
             
-            # 重複データチェック
+            # ?????????
             is_duplicate = self.is_duplicate_data(tick_data)
 
-            # デバッグログ追加 - ここから
+            # ???????? - ????
             #logging.debug(f"[{self.symbol}] DEBUG: is_duplicate={is_duplicate}, duplicate_count={self.duplicate_count}")
             #logging.debug(f"[{self.symbol}] DEBUG: market_open={market_open}")
             #if len(self.data_buffer) > 0:
@@ -207,57 +207,57 @@ class SymbolDataManager:
             #    logging.debug(f"[{self.symbol}] DEBUG: last_close={last_item['close']}, new_close={tick_data['close']}")
             #    logging.debug(f"[{self.symbol}] DEBUG: datetime_equal={last_item['datetime'] == tick_data['datetime']}")
             #    logging.debug(f"[{self.symbol}] DEBUG: close_equal={last_item['close'] == tick_data['close']}")
-            # デバッグログ追加 - ここまで
+            # ???????? - ????
             
             if is_duplicate:
                 self.duplicate_count += 1
                 
-                # 市場休場中の重複データは制限
+                # ??????????????
                 if not market_open:
-                    if self.duplicate_count > 10:  # 10回以上の重複はスキップ
-                        logging.debug(f"[{self.symbol}] 休場中重複データスキップ (#{self.duplicate_count})")
+                    if self.duplicate_count > 10:  # 10???????????
+                        logging.debug(f"[{self.symbol}] ???????????? (#{self.duplicate_count})")
                         return True
                 
-                # 市場開放中でも過度な重複は制限
+                # ???????????????
                 elif self.duplicate_count > 3:
-                    logging.debug(f"[{self.symbol}] 重複データスキップ (#{self.duplicate_count})")
+                    logging.debug(f"[{self.symbol}] ????????? (#{self.duplicate_count})")
                     return True
             else:
-                self.duplicate_count = 0  # 新しいデータでカウントリセット
+                self.duplicate_count = 0  # ???????????????
             
-            # バッファに追加
+            # ???????
             self.data_buffer.append(tick_data)
             
-            # ログメッセージ調整
+            # ?????????
             if market_open:
-                logging.info(f"[{self.symbol}] ティックデータ追加: {tick_data['datetime']}, Close: {tick_data['close']}")
+                logging.info(f"[{self.symbol}] ?????????: {tick_data['datetime']}, Close: {tick_data['close']}")
             else:
-                logging.debug(f"[{self.symbol}] 休場中データ: {tick_data['datetime']}, Close: {tick_data['close']}")
+                logging.debug(f"[{self.symbol}] ??????: {tick_data['datetime']}, Close: {tick_data['close']}")
             
-            # バッファサイズ管理（市場状況に応じて調整）
+            # ?????????(??????????)
             if market_open:
                 max_size = self.max_buffer_size
             else:
-                max_size = self.max_buffer_size // 10  # 休場中は1/10に制限
+                max_size = self.max_buffer_size // 10  # ????1/10???
             
             if len(self.data_buffer) > max_size + 50:
                 self.archive_old_data()
             
-            # 自動バックアップチェック
+            # ????????????
             self.auto_backup_check()
             
             return True
             
         except Exception as e:
-            logging.error(f"[{self.symbol}] データ追加エラー: {e}")
+            logging.error(f"[{self.symbol}] ????????: {e}")
             return False
     
     def archive_old_data(self):
-        """改良版アーカイブ処理"""
+        """??????????"""
         try:
             current_max = self.max_buffer_size
             
-            # 現在が休場中なら制限を厳しく
+            # ??????????????
             if len(self.data_buffer) > 0:
                 last_time = self.data_buffer[-1]['datetime']
                 if not self.is_market_open(last_time):
@@ -266,22 +266,22 @@ class SymbolDataManager:
             if len(self.data_buffer) <= current_max:
                 return
             
-            # アーカイブ対象データ
+            # ??????????
             excess_count = len(self.data_buffer) - current_max
             archive_data = self.data_buffer[:excess_count]
             
             if len(archive_data) == 0:
                 return
             
-            # 重複データが多い場合は簡潔なアーカイブ
+            # ???????????????????
             unique_dates = set()
             for item in archive_data:
                 unique_dates.add(pd.to_datetime(item['datetime']).date())
             
             if len(unique_dates) == 1 and excess_count > 100:
-                # 同じ日のデータが大量にある場合（休場中の重複データ）
-                sample_data = archive_data[::10]  # 10件おきにサンプリング
-                logging.info(f"[{self.symbol}] 休場中重複データをサンプリングアーカイブ: {len(archive_data)}件 -> {len(sample_data)}件")
+                # ???????????????(?????????)
+                sample_data = archive_data[::10]  # 10??????????
+                logging.info(f"[{self.symbol}] ????????????????????: {len(archive_data)}? -> {len(sample_data)}?")
                 archive_data = sample_data
             
             if len(archive_data) == 0:
@@ -290,7 +290,7 @@ class SymbolDataManager:
             
             archive_df = pd.DataFrame(archive_data)
             
-            # ファイル名生成
+            # ???????
             first_date = pd.to_datetime(archive_df['datetime'].iloc[0]).strftime('%Y%m%d_%H%M')
             last_date = pd.to_datetime(archive_df['datetime'].iloc[-1]).strftime('%Y%m%d_%H%M')
             timestamp = datetime.now().strftime('%H%M%S')
@@ -299,21 +299,21 @@ class SymbolDataManager:
             archive_filename = f"{self.symbol}_{first_date}_{last_date}_{market_status}_{timestamp}.csv"
             archive_path = self.archive_dir / archive_filename
             
-            # アーカイブ保存
+            # ???????
             archive_df['datetime'] = pd.to_datetime(archive_df['datetime']).dt.strftime('%Y-%m-%d %H:%M:%S')
             archive_df['symbol'] = self.symbol
             archive_df.to_csv(archive_path, index=False, encoding='utf-8')
             
-            logging.info(f"[{self.symbol}] アーカイブ完了: {len(archive_data)}件 -> {archive_filename}")
+            logging.info(f"[{self.symbol}] ???????: {len(archive_data)}? -> {archive_filename}")
             
-            # バッファクリア
+            # ???????
             self.data_buffer = self.data_buffer[excess_count:]
             
         except Exception as e:
-            logging.error(f"[{self.symbol}] アーカイブエラー: {e}")
+            logging.error(f"[{self.symbol}] ????????: {e}")
     
     def auto_backup_check(self):
-        """自動バックアップチェック"""
+        """????????????"""
         current_time = datetime.now()
         time_diff = (current_time - self.last_backup_time).total_seconds()
         
@@ -321,7 +321,7 @@ class SymbolDataManager:
             self.save_data()
     
     def get_recent_dataframe(self, periods=200):
-        """最近のデータをDataFrameで取得"""
+        """???????DataFrame???"""
         if len(self.data_buffer) < periods:
             periods = len(self.data_buffer)
         
@@ -336,7 +336,7 @@ class SymbolDataManager:
         return df
     
     def get_symbol_stats(self):
-        """シンボル統計情報"""
+        """????????"""
         current_size = len(self.data_buffer)
         archive_files = list(self.archive_dir.glob(f"{self.symbol}_*.csv"))
         archive_count = len(archive_files)
@@ -349,7 +349,7 @@ class SymbolDataManager:
             except:
                 pass
         
-        # 市場状況を追加
+        # ???????
         market_status = "Unknown"
         if len(self.data_buffer) > 0:
             last_time = self.data_buffer[-1]['datetime']
@@ -373,37 +373,37 @@ class TradingAPIServer:
         else:
             self.ml_system = None
             
-        # シンボル別データマネージャー
+        # ??????????????
         self.symbol_managers = {}
         self.data_base_dir = current_dir
         self.max_buffer_size = 1000
         
-        # システム状態
-        self.last_signal = {}  # シンボル別
-        self.last_confidence = {}  # シンボル別
-        self.last_prediction = {}  # シンボル別
-        self.model_loaded = {}  # シンボル別
+        # ??????
+        self.last_signal = {}  # ?????
+        self.last_confidence = {}  # ?????
+        self.last_prediction = {}  # ?????
+        self.model_loaded = {}  # ?????
         
-        # エラー管理
+        # ?????
         self.error_count = 0
         self.last_error_time = None
         self.connection_errors = 0
         self.last_successful_request = datetime.now()
         
-        # モデルの自動読み込み
+        # ??????????
         if ML_SYSTEM_AVAILABLE:
             self.load_existing_models()
         
-        # バックグラウンドでの定期処理開始
+        # ????????????????
         self.start_background_tasks()
     
     def get_symbol_manager(self, symbol):
-        """シンボル別データマネージャーを取得"""
+        """?????????????????"""
         if symbol not in self.symbol_managers:
             self.symbol_managers[symbol] = SymbolDataManager(
                 self.data_base_dir, symbol, self.max_buffer_size
             )
-            # 新しいシンボルの初期状態設定
+            # ??????????????
             self.last_signal[symbol] = "HOLD"
             self.last_confidence[symbol] = 0.0
             self.last_prediction[symbol] = None
@@ -412,62 +412,124 @@ class TradingAPIServer:
         return self.symbol_managers[symbol]
     
     def load_existing_models(self):
-        """既存のモデルを読み込み"""
+        """???????????(trading_model.pkl??)"""
         if not ML_SYSTEM_AVAILABLE:
+            logging.warning("ML System not available - ???????")
             return
         
-        # シンボル別モデルファイルを探索
-        model_pattern = "trading_model_*.pkl"
-        model_files = list(Path(current_dir).glob(model_pattern))
-        
-        for model_file in model_files:
-            symbol = model_file.stem.replace('trading_model_', '')
-            try:
-                if self.ml_system.load_model(str(model_file)):
-                    self.model_loaded[symbol] = True
-                    logging.info(f"[{symbol}] モデル読み込み成功: {model_file}")
-                else:
-                    logging.info(f"[{symbol}] モデルファイルが見つかりません: {model_file}")
-            except Exception as e:
-                logging.error(f"[{symbol}] モデル読み込みエラー: {e}")
+        try:
+            # 1. ????? (trading_model.pkl) ?????
+            generic_model_file = Path(current_dir) / "trading_model.pkl"
+            if generic_model_file.exists():
+                logging.info(f"????????????: {generic_model_file}")
+                try:
+                    if self.ml_system.load_model(str(generic_model_file)):
+                        # ????????????????
+                        for symbol in ['EURUSD', 'USDJPY', 'GBPUSD', 'AUDUSD', 'USDCAD']:  # ??????
+                            self.model_loaded[symbol] = True
+                            logging.info(f"[{symbol}] ???????????")
+                        
+                        logging.info("? ??ML??? (trading_model.pkl) ??????")
+                        return True
+                    else:
+                        logging.warning("? ?????????????")
+                except Exception as e:
+                    logging.error(f"? ????????????: {e}")
+            
+            # 2. ??????????????? (???????)
+            model_pattern = "trading_model_*.pkl"
+            model_files = list(Path(current_dir).glob(model_pattern))
+            
+            if len(model_files) == 0:
+                logging.info("?? ??????????????????")
+                logging.info("?? ????????????? /retrain/<symbol> ?????????????")
+                return False
+            
+            success_count = 0
+            for model_file in model_files:
+                symbol = model_file.stem.replace('trading_model_', '')
+                try:
+                    if self.ml_system.load_model(str(model_file)):
+                        self.model_loaded[symbol] = True
+                        success_count += 1
+                        logging.info(f"[{symbol}] ???????????: {model_file}")
+                    else:
+                        logging.warning(f"[{symbol}] ?????????: {model_file}")
+                except Exception as e:
+                    logging.error(f"[{symbol}] ??????????: {e}")
+            
+            if success_count > 0:
+                logging.info(f"? {success_count}??????????????????")
+                return True
+            else:
+                logging.warning("? ?????????????????????")
+                return False
+                
+        except Exception as e:
+            logging.error(f"? ???????????????: {e}")
+            return False
     
     def add_tick_data(self, tick_data, symbol):
-        """ティックデータを追加"""
+        """??????????"""
         manager = self.get_symbol_manager(symbol)
         success = manager.add_data(tick_data)
                 
         return success
     
     def generate_trading_signal(self, symbol):
-        """取引シグナルを生成"""
+        """?????????(???????????????)"""
         try:
-            if symbol not in self.model_loaded or not self.model_loaded[symbol]:
-                return "HOLD", 0.0, None, f"Model not loaded for {symbol}"
+            # ML????????????
+            if not ML_SYSTEM_AVAILABLE:
+                return "HOLD", 0.0, None, f"ML system not available"
             
+            if self.ml_system is None:
+                return "HOLD", 0.0, None, f"ML system not initialized"
+            
+            # ??????????????????
+            if symbol not in self.model_loaded or not self.model_loaded[symbol]:
+                # ???????????????????
+                logging.info(f"[{symbol}] ???????? - ????????")
+                self.load_existing_models()
+                
+                if symbol not in self.model_loaded or not self.model_loaded[symbol]:
+                    return "HOLD", 0.0, None, f"Model not loaded for {symbol}"
+            
+            # ?????
             manager = self.get_symbol_manager(symbol)
             df = manager.get_recent_dataframe(200)
             
             if df is None or len(df) < 100:
-                return "HOLD", 0.0, None, f"Insufficient data for {symbol}"
+                available_data = len(df) if df is not None else 0
+                return "HOLD", 0.0, None, f"Insufficient data for {symbol} (have: {available_data}, need: 100)"
             
+            # ??????
             current_price = df['close'].iloc[-1]
+            
+            # ML???????????
             signal, confidence, predicted_price = self.ml_system.generate_signal(df, current_price)
             
-            # シンボル別状態更新
+            # ?????????
             self.last_signal[symbol] = signal
             self.last_confidence[symbol] = confidence
             self.last_prediction[symbol] = predicted_price
             
-            logging.info(f"[{symbol}] シグナル生成: {signal}, 信頼度: {confidence:.3f}")
+            # ???????
+            price_change = ""
+            if predicted_price and predicted_price != current_price:
+                change_pct = ((predicted_price - current_price) / current_price) * 100
+                price_change = f" ({change_pct:+.2f}%)"
+            
+            logging.info(f"[{symbol}] ?? ??????: {signal}, ???: {confidence:.3f}{price_change}")
             return signal, confidence, predicted_price, "Success"
             
         except Exception as e:
-            error_msg = f"[{symbol}] シグナル生成エラー: {e}"
+            error_msg = f"[{symbol}] ?????????: {str(e)}"
             logging.error(error_msg)
             return "HOLD", 0.0, None, error_msg
     
     def retrain_model(self, symbol):
-        """モデルの再訓練"""
+        """???????"""
         try:
             manager = self.get_symbol_manager(symbol)
             df = manager.get_recent_dataframe()
@@ -475,51 +537,51 @@ class TradingAPIServer:
             if df is None or len(df) < 500:
                 return False, f"Insufficient data for training {symbol} (minimum 500 required)"
             
-            logging.info(f"[{symbol}] モデル再訓練開始...")
+            logging.info(f"[{symbol}] ????????...")
             self.ml_system.train_model(df)
             
-            # シンボル別モデルファイル名
+            # ?????????????
             model_file = f"trading_model_{symbol}.pkl"
             self.ml_system.save_model(model_file)
             self.model_loaded[symbol] = True
             
-            # 再訓練完了時にデータを保存
+            # ?????????????
             manager.save_data()
             
-            logging.info(f"[{symbol}] モデル再訓練完了")
+            logging.info(f"[{symbol}] ????????")
             return True, f"Model retrained successfully for {symbol}"
             
         except Exception as e:
-            error_msg = f"[{symbol}] モデル再訓練エラー: {e}"
+            error_msg = f"[{symbol}] ?????????: {e}"
             logging.error(error_msg)
             return False, error_msg
     
     def start_background_tasks(self):
-        """バックグラウンドタスクを開始"""
+        """??????????????"""
         def background_worker():
             while True:
                 try:
-                    # 各シンボルのモデル再訓練チェック
+                    # ????????????????
                     for symbol, manager in self.symbol_managers.items():
                         buffer_size = len(manager.data_buffer)
                         if buffer_size >= 500 and buffer_size % 100 == 0:
-                            logging.info(f"[{symbol}] バックグラウンドでモデル更新中...")
+                            logging.info(f"[{symbol}] ???????????????...")
                             self.retrain_model(symbol)
                         
-                        # 定期バックアップ
+                        # ????????
                         manager.auto_backup_check()
                     
-                    time.sleep(300)  # 5分ごとにチェック
+                    time.sleep(300)  # 5????????
                     
                 except Exception as e:
-                    logging.error(f"バックグラウンドタスクエラー: {e}")
+                    logging.error(f"??????????????: {e}")
                     time.sleep(60)
         
         thread = threading.Thread(target=background_worker, daemon=True)
         thread.start()
     
     def get_all_symbols_stats(self):
-        """全シンボルの統計情報"""
+        """??????????"""
         stats = {}
         for symbol, manager in self.symbol_managers.items():
             stats[symbol] = manager.get_symbol_stats()
@@ -529,12 +591,12 @@ class TradingAPIServer:
         
         return stats
 
-# グローバルAPIサーバーインスタンス
+# ?????API??????????
 api_server = TradingAPIServer()
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """ヘルスチェック"""
+    """???????"""
     total_data_points = sum(len(manager.data_buffer) for manager in api_server.symbol_managers.values())
     
     return jsonify({
@@ -547,7 +609,7 @@ def health_check():
 
 @app.route('/tick', methods=['POST'])
 def receive_tick():
-    """ティックデータ受信（シンボル対応）"""
+    """?????????(??????)"""
     try:
         data = request.get_json()
         
@@ -555,15 +617,15 @@ def receive_tick():
             api_server.connection_errors += 1
             return jsonify({'error': 'No data provided'}), 400
         
-        # シンボル情報取得
+        # ????????
         symbol = data.get('symbol', 'UNKNOWN')
         if symbol == 'UNKNOWN':
             return jsonify({'error': 'Symbol not specified'}), 400
         
-        # シンボル情報を除去してティックデータを抽出
+        # ?????????????????????
         tick_data = {k: v for k, v in data.items() if k != 'symbol'}
         
-        # データ追加
+        # ?????
         success = api_server.add_tick_data(tick_data, symbol)
         
         if success:
@@ -596,7 +658,7 @@ def receive_tick():
 
 @app.route('/signal/<symbol>', methods=['GET'])
 def get_signal(symbol):
-    """取引シグナル取得（シンボル指定）"""
+    """????????(??????)"""
     try:
         signal, confidence, predicted_price, message = api_server.generate_trading_signal(symbol)
         
@@ -616,12 +678,12 @@ def get_signal(symbol):
         })
         
     except Exception as e:
-        logging.error(f"シグナル取得エラー [{symbol}]: {e}")
+        logging.error(f"????????? [{symbol}]: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/retrain/<symbol>', methods=['POST'])
 def manual_retrain(symbol):
-    """手動モデル再訓練（シンボル指定）"""
+    """????????(??????)"""
     try:
         success, message = api_server.retrain_model(symbol)
         
@@ -641,12 +703,12 @@ def manual_retrain(symbol):
             }), 400
             
     except Exception as e:
-        logging.error(f"手動再訓練エラー [{symbol}]: {e}")
+        logging.error(f"???????? [{symbol}]: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/status', methods=['GET'])
 def get_status():
-    """システム状態取得（全シンボル）"""
+    """????????(?????)"""
     try:
         return jsonify({
             'symbols': api_server.get_all_symbols_stats(),
@@ -654,12 +716,12 @@ def get_status():
         })
         
     except Exception as e:
-        logging.error(f"状態取得エラー: {e}")
+        logging.error(f"???????: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/status/<symbol>', methods=['GET'])
 def get_symbol_status(symbol):
-    """シンボル別状態取得"""
+    """?????????"""
     try:
         manager = api_server.get_symbol_manager(symbol)
         stats = manager.get_symbol_stats()
@@ -671,15 +733,15 @@ def get_symbol_status(symbol):
         return jsonify(stats)
         
     except Exception as e:
-        logging.error(f"シンボル状態取得エラー [{symbol}]: {e}")
+        logging.error(f"??????????? [{symbol}]: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/data/<symbol>/latest', methods=['GET'])
 def get_latest_data(symbol):
-    """最新データ取得（シンボル指定）"""
+    """???????(??????)"""
     try:
         count = request.args.get('count', 10, type=int)
-        count = min(count, 100)  # 最大100件
+        count = min(count, 100)  # ??100?
         
         manager = api_server.get_symbol_manager(symbol)
         
@@ -688,7 +750,7 @@ def get_latest_data(symbol):
         
         latest_data = manager.data_buffer[-count:]
         
-        # datetime を文字列に変換
+        # datetime ???????
         formatted_data = []
         for item in latest_data:
             formatted_item = item.copy()
@@ -703,12 +765,12 @@ def get_latest_data(symbol):
         })
         
     except Exception as e:
-        logging.error(f"最新データ取得エラー [{symbol}]: {e}")
+        logging.error(f"?????????? [{symbol}]: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/backup/<symbol>', methods=['POST'])
 def manual_backup(symbol):
-    """手動データバックアップ（シンボル指定）"""
+    """???????????(??????)"""
     try:
         manager = api_server.get_symbol_manager(symbol)
         manager.save_data()
@@ -722,12 +784,12 @@ def manual_backup(symbol):
             'timestamp': datetime.now().isoformat()
         })
     except Exception as e:
-        logging.error(f"手動バックアップエラー [{symbol}]: {e}")
+        logging.error(f"??????????? [{symbol}]: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/backup/all', methods=['POST'])
 def backup_all_symbols():
-    """全シンボルのデータバックアップ"""
+    """???????????????"""
     try:
         results = {}
         for symbol, manager in api_server.symbol_managers.items():
@@ -744,9 +806,72 @@ def backup_all_symbols():
             'timestamp': datetime.now().isoformat()
         })
     except Exception as e:
-        logging.error(f"全シンボルバックアップエラー: {e}")
+        logging.error(f"??????????????: {e}")
         return jsonify({'error': str(e)}), 500
 
+# if __name__ == '__main__': ??????????????????
+# ?????????????
+
 if __name__ == '__main__':
-    logging.info("Flask Trading API Server starting...")
+    print("=" * 80)
+    print("?? Flask Trading API Server ???...")
+    print("=" * 80)
+    
+    # ML????????
+    if ML_SYSTEM_AVAILABLE:
+        print("? ML Trading System: ????")
+        
+        # ??????????
+        generic_model = Path(current_dir) / "trading_model.pkl"
+        if generic_model.exists():
+            print(f"? ???????????: {generic_model}")
+            print("?? ????????????????????????")
+        else:
+            print("??  ????????? (trading_model.pkl) ????????")
+            
+            # ?????????????
+            symbol_models = list(Path(current_dir).glob("trading_model_*.pkl"))
+            if symbol_models:
+                print(f"? ??????????: {len(symbol_models)}?")
+                for model in symbol_models:
+                    symbol = model.stem.replace('trading_model_', '')
+                    print(f"   - {symbol}: {model}")
+            else:
+                print("?? ??????????????")
+                print("   ??????? /retrain/<symbol> ?????????????")
+    else:
+        print("? ML Trading System: ????")
+        print("   ????API????????????")
+    
+    print("")
+    print("?? ?????API???????:")
+    print("  GET  /health                    - ???????")
+    print("  POST /tick                      - ????????? (symbol??)")
+    print("  GET  /signal/<symbol>           - ????????")
+    print("  POST /retrain/<symbol>          - ??????")
+    print("  GET  /status                    - ???????")
+    print("  GET  /status/<symbol>           - ???????")
+    print("  GET  /data/<symbol>/latest      - ???????")
+    print("  POST /backup/<symbol>           - ????????")
+    print("  POST /backup/all                - ???????????")
+    print("")
+    print("?? ?????? (MT5??):")
+    print('  POST /tick')
+    print('  {')
+    print('    "symbol": "EURUSD",')
+    print('    "datetime": "2024-01-01T10:00:00",')
+    print('    "open": 1.1000, "high": 1.1010,')
+    print('    "low": 1.0990, "close": 1.1005,')
+    print('    "volume": 100')
+    print('  }')
+    print("")
+    print("?? ??????: http://localhost:5000")
+    print("=" * 80)
+    
+    # ??????
+    logging.info("Flask Trading API Server ???????")
+    if ML_SYSTEM_AVAILABLE:
+        logging.info("ML Trading System ready for predictions")
+    
+    # Flask ??????
     app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)

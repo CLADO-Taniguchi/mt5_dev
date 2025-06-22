@@ -13,10 +13,17 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # TensorFlow/Keras for LSTM
 import tensorflow as tf
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import LSTM, Dense, Dropout, Input, concatenate
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow import keras
+
+# 必要なKerasコンポーネントを明示的にインポート
+Sequential = keras.Sequential
+LSTM = keras.layers.LSTM
+Dense = keras.layers.Dense
+Dropout = keras.layers.Dropout
+Input = keras.layers.Input
+concatenate = keras.layers.concatenate
+Adam = keras.optimizers.Adam
+EarlyStopping = keras.callbacks.EarlyStopping
 
 # Technical Analysis
 import talib
