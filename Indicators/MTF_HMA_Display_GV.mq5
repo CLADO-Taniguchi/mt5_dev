@@ -201,26 +201,11 @@ int OnCalculate(const int rates_total,
         hmaBuffer[i] = mtf_hma[mtf_index];
         hmaColors[i] = mtf_color[mtf_index];
         
-        // Place arrows only on the first bar of the new MTF period
-        datetime mtf_bar_open_time = iTime(_Symbol, Source_Timeframe, mtf_index);
-
-        if(time[i] == mtf_bar_open_time)
-        {
-            if(mtf_buy[mtf_index] > 0)
-                buySignalBuffer[i] = low[i] - 10 * _Point;
-            else
-                buySignalBuffer[i] = EMPTY_VALUE;
-
-            if(mtf_sell[mtf_index] > 0)
-                sellSignalBuffer[i] = high[i] + 10 * _Point;
-            else
-                sellSignalBuffer[i] = EMPTY_VALUE;
-        }
-        else
-        {
-            buySignalBuffer[i] = EMPTY_VALUE;
-            sellSignalBuffer[i] = EMPTY_VALUE;
-        }
+        // --- [IMPORTANT SPEC 4] Disable Arrow Objects ---
+        // M1チャートでは矢印オブジェクトが大量に生成されるため、すべてEMPTY_VALUEに設定
+        // HMAラインの表示のみを維持し、矢印は表示しない
+        buySignalBuffer[i] = EMPTY_VALUE;
+        sellSignalBuffer[i] = EMPTY_VALUE;
     }
     return(rates_total);
 }
