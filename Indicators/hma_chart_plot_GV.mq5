@@ -267,6 +267,24 @@ int OnCalculate(
         }
     }
     
+    // --- グローバル変数への書き出し ---
+    // 最新のバー（インデックス rates_total - 1）の情報をグローバル変数に書き込む
+    if(rates_total > 0)
+    {
+        int last_idx = rates_total - 1;
+        string prefix = "GV." + _Symbol + "." + TimeframeToString(Period()) + ".";
+        
+        GlobalVariableSet(prefix + "HMA_Value", hmaBuffer[last_idx]);
+        GlobalVariableSet(prefix + "HMA_Color", hmaColors[last_idx]);
+        
+        // シグナルはEMPTY_VALUEだと書き込めないので、0か1に変換する
+        GlobalVariableSet(prefix + "Buy_Signal", buySignalBuffer[last_idx] == 1.0 ? 1.0 : 0.0);
+        GlobalVariableSet(prefix + "Sell_Signal", sellSignalBuffer[last_idx] == 1.0 ? 1.0 : 0.0);
+        
+        // 最終更新時間を記録（デバッグ用）
+        GlobalVariableSet(prefix + "Last_Update", TimeCurrent());
+    }
+    
     return rates_total;
 }
 
