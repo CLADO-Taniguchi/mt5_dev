@@ -311,20 +311,12 @@ int OnCalculate(
             marketConditionBuffer[i] = EMPTY_VALUE;
             confidenceBuffer[i] = EMPTY_VALUE;
             volatilityRatioBuffer[i] = EMPTY_VALUE;
-            if(i < 3) continue;
+            continue;
         }
-        
-        // WMA計算
-        for (int j = 0; j < Period; j++)
-        {
-            if(i < Period) {
-                rawWMA[i] = EMPTY_VALUE;
-                continue;
-            }
-            double wma_half = WMA(i, Period / 2, close);
-            double wma_full = WMA(i, Period, close);
-            rawWMA[i] = (wma_half != EMPTY_VALUE && wma_full != EMPTY_VALUE) ? 2 * wma_half - wma_full : EMPTY_VALUE;
-        }
+        // WMA計算（内側ループ削除）
+        double wma_half = WMA(i, Period / 2, close);
+        double wma_full = WMA(i, Period, close);
+        rawWMA[i] = (wma_half != EMPTY_VALUE && wma_full != EMPTY_VALUE) ? 2 * wma_half - wma_full : EMPTY_VALUE;
 
         // HMA計算
         double hma_value = WMA(i, sqrtPeriod, rawWMA);
