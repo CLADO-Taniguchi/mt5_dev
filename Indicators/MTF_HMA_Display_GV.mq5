@@ -39,8 +39,10 @@ double sellSignalBuffer[];  // SELL Arrow
 int hma_source_handle = INVALID_HANDLE;
 
 // 再計算するバー数
-#define RECALC_BARS 60      // 1時間分
-#define MTF_COPY_BARS 65    // 余裕を持って+5本
+#define FULL_HISTORY_BARS 43200   // 1ヶ月分
+#define RECALC_BARS 120           // 2時間分
+#define FULL_MTF_COPY_BARS 43200
+#define MTF_COPY_BARS 130
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -156,11 +158,14 @@ int OnCalculate(const int rates_total,
     if(rates_total < 2 || hma_source_handle == INVALID_HANDLE)
         return(0);
 
-    int start_bar = rates_total - RECALC_BARS;
+    // 初回は全履歴、2回目以降は直近分だけ再計算
+    int bars_to_process = (prev_calculated == 0) ? FULL_HISTORY_BARS : RECALC_BARS;
+    int start_bar = rates_total - bars_to_process;
     if(start_bar < 1) start_bar = 1;
 
-    int mtf_bars = (int)SeriesInfoInteger(_Symbol, Source_Timeframe, SERIES_BARS_COUNT);
-    if(mtf_bars < MTF_COPY_BARS) mtf_bars = MTF_COPY_BARS;
+    int mtf_bars = (prev_calculated == 0) ? FULL_MTF_COPY_BARS : MTF_COPY_BARS;
+    int available_mtf_bars = (int)SeriesInfoInteger(_Symbol, Source_Timeframe, SERIES_BARS_COUNT);
+    if(mtf_bars > available_mtf_bars) mtf_bars = available_mtf_bars;
 
     datetime mtf_time[];
     double mtf_hma[], mtf_color[], mtf_buy[], mtf_sell[];

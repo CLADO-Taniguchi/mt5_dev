@@ -322,12 +322,17 @@ int OnCalculate(
         double hma_value = WMA(i, sqrtPeriod, rawWMA);
         hmaBuffer[i] = hma_value;
         
-        // 市場状態分析（シフト値を正しく計算）
-        int market_shift = i;
-        MarketCondition market = AnalyzeMarketCondition(market_shift);
-        marketConditionBuffer[i] = market.isTrending ? 1.0 : 0.0;
-        confidenceBuffer[i] = market.confidence;
-        volatilityRatioBuffer[i] = market.volatilityRatio;
+        // 市場状態分析は最新バーのみ
+        if(i == rates_total - 1) {
+            MarketCondition market = AnalyzeMarketCondition(i);
+            marketConditionBuffer[i] = market.isTrending ? 1.0 : 0.0;
+            confidenceBuffer[i] = market.confidence;
+            volatilityRatioBuffer[i] = market.volatilityRatio;
+        } else {
+            marketConditionBuffer[i] = EMPTY_VALUE;
+            confidenceBuffer[i] = EMPTY_VALUE;
+            volatilityRatioBuffer[i] = EMPTY_VALUE;
+        }
         
         // 色設定
         if (i > 0 && hmaBuffer[i] != EMPTY_VALUE && hmaBuffer[i - 1] != EMPTY_VALUE)
