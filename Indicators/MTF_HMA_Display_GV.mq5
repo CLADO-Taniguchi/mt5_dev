@@ -38,6 +38,10 @@ double sellSignalBuffer[];  // SELL Arrow
 //--- Indicator Handle
 int hma_source_handle = INVALID_HANDLE;
 
+// 再計算するバー数
+#define RECALC_BARS 60      // 1時間分
+#define MTF_COPY_BARS 65    // 余裕を持って+5本
+
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
@@ -70,13 +74,13 @@ int OnInit()
     //--------------------------------
 
     //--- Get Handle for the source indicator
-    hma_source_handle = iCustom(_Symbol, Source_Timeframe, "hma_chart_plot",
+    hma_source_handle = iCustom(_Symbol, Source_Timeframe, "hma_chart_plot_GV",
                                 HMA_Period, ADX_Period, ADX_Threshold, ATR_Period, MA_Period,
                                 Volatility_Threshold, BB_Period, BB_Deviation, Trend_Strength_Period);
     
     if(hma_source_handle == INVALID_HANDLE)
     {
-        Alert("ソースインジケーター 'hma_chart_plot' のハンドル作成に失敗しました - エラー ", GetLastError());
+        Alert("ソースインジケーター 'hma_chart_plot_GV' のハンドル作成に失敗しました - エラー ", GetLastError());
         return(INIT_FAILED);
     }
 
@@ -152,60 +156,48 @@ int OnCalculate(const int rates_total,
     if(rates_total < 2 || hma_source_handle == INVALID_HANDLE)
         return(0);
 
-    // Determine how many bars need to be calculated
-    int bars_to_process = rates_total - prev_calculated;
-    if (prev_calculated > 0)
-        bars_to_process++;
-        
-    // A limit to prevent excessive history calculation on first run
-    int limit = 5000; 
-    if(bars_to_process > limit) bars_to_process = limit;
-
-    // Set the starting bar for the loop
-    int start_bar = rates_total - bars_to_process;
+    int start_bar = rates_total - RECALC_BARS;
     if(start_bar < 1) start_bar = 1;
 
-    //--- Get data from the source indicator ---
+    int mtf_bars = (int)SeriesInfoInteger(_Symbol, Source_Timeframe, SERIES_BARS_COUNT);
+    if(mtf_bars < MTF_COPY_BARS) mtf_bars = MTF_COPY_BARS;
+
     datetime mtf_time[];
     double mtf_hma[], mtf_color[], mtf_buy[], mtf_sell[];
 
-    // Ensure we have enough data on the source timeframe
-    int mtf_bars = (int)SeriesInfoInteger(_Symbol, Source_Timeframe, SERIES_BARS_COUNT);
-    if(mtf_bars < 2) return(0);
-
-    // Copy all available data from the source indicator
     if(CopyTime(_Symbol, Source_Timeframe, 0, mtf_bars, mtf_time) < 1) return (0);
     if(CopyBuffer(hma_source_handle, 0, 0, mtf_bars, mtf_hma) < 1) return(0);
     if(CopyBuffer(hma_source_handle, 1, 0, mtf_bars, mtf_color) < 1) return(0);
     if(CopyBuffer(hma_source_handle, 2, 0, mtf_bars, mtf_buy) < 1) return(0);
     if(CopyBuffer(hma_source_handle, 3, 0, mtf_bars, mtf_sell) < 1) return(0);
-    
-    // CopyBufferから取得したデータは、デフォルトで「時系列配列」(新しい→古い) になっている。
-    // iBarShiftで正しくインデックスを引くために、向きを明示的に時系列に設定しておく。
+
     ArraySetAsSeries(mtf_time, true);
     ArraySetAsSeries(mtf_hma, true);
     ArraySetAsSeries(mtf_color, true);
     ArraySetAsSeries(mtf_buy, true);
     ArraySetAsSeries(mtf_sell, true);
 
-    //--- Map the MTF data to the current chart bars ---
     for(int i = start_bar; i < rates_total; i++)
     {
-        // --- [IMPORTANT SPEC 3] Time-axis Synchronization ---
-        // iBarShift()を使い、現在のチャート(M1)のバー(i)の時刻が、
-        // データソースのチャート(M5)では何本前のバー(mtf_index)に該当するかを計算する。
-        // これにより、異なる時間足のデータを正しい位置にマッピングする。
         int mtf_index = iBarShift(_Symbol, Source_Timeframe, time[i]);
         if(mtf_index >= mtf_bars || mtf_index < 0) continue;
 
         hmaBuffer[i] = mtf_hma[mtf_index];
         hmaColors[i] = mtf_color[mtf_index];
-        
-        // --- [IMPORTANT SPEC 4] Disable Arrow Objects ---
-        // M1チャートでは矢印オブジェクトが大量に生成されるため、すべてEMPTY_VALUEに設定
-        // HMAラインの表示のみを維持し、矢印は表示しない
         buySignalBuffer[i] = EMPTY_VALUE;
         sellSignalBuffer[i] = EMPTY_VALUE;
+
+        datetime mtf_bar_open_time = iTime(_Symbol, Source_Timeframe, mtf_index);
+        bool is_new_mtf_bar = (time[i] == mtf_bar_open_time);
+        if(is_new_mtf_bar && mtf_index + 2 < mtf_bars) 
+        {
+            double prev_color = mtf_color[mtf_index + 1];
+            double prev_prev_color = mtf_color[mtf_index + 2];
+            if(prev_prev_color == 1.0 && prev_color == 0.0)
+                buySignalBuffer[i] = low[i] - 10 * _Point;
+            else if(prev_prev_color == 0.0 && prev_color == 1.0)
+                sellSignalBuffer[i] = high[i] + 10 * _Point;
+        }
     }
     return(rates_total);
 }
